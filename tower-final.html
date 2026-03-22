@@ -12,13 +12,21 @@
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            background: linear-gradient(135deg, #1e1e3f 0%, #0d0d1a 100%);
             color: white;
             overflow: hidden;
+            min-height: 100vh;
+            margin: 0;
         }
         canvas {
             display: block;
             cursor: crosshair;
+            position: fixed;
+            left: 280px;
+            top: 80px;
+            right: 16px;
+            bottom: 176px;
+            z-index: 1;
         }
         .ui-panel {
             position: fixed;
@@ -59,11 +67,13 @@
         .tower-selector {
             left: 16px;
             top: 80px;
-            width: 100px;
-            height: calc(100vh - 120px);
-            max-height: 500px;
+            bottom: 96px;
+            width: 250px;
             padding: 12px;
-            overflow-y: auto;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
         .tower-selector::-webkit-scrollbar {
             width: 6px;
@@ -80,18 +90,20 @@
             background: rgba(78, 205, 196, 0.7);
         }
         .tower-btn {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
             background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
             border: 2px solid rgba(74, 85, 104, 0.5);
             border-radius: 12px;
             color: white;
-            font-size: 28px;
+            font-size: 32px;
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            aspect-ratio: 1;
         }
         .tower-btn:hover {
             border-color: #4ecdc4;
@@ -110,13 +122,80 @@
             color: #95a5a6;
             font-weight: 600;
         }
+        .tower-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            padding: 12px 0;
+        }
+        .tower-section {
+            border-bottom: 1px solid rgba(78, 205, 196, 0.2);
+            padding-bottom: 12px;
+            margin-bottom: 12px;
+        }
+        .tower-section:last-child {
+            border-bottom: none;
+        }
+        .tower-list-panel {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 12px;
+            position: relative !important;
+        }
+        .tower-list-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+        .tower-list-panel::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+        }
+        .tower-list-panel::-webkit-scrollbar-thumb {
+            background: rgba(78, 205, 196, 0.5);
+            border-radius: 3px;
+        }
+        .tower-list-panel::-webkit-scrollbar-thumb:hover {
+            background: rgba(78, 205, 196, 0.7);
+        }
+        .tower-info-panel {
+            flex: 0 0 auto;
+            padding: 12px;
+            position: relative !important;
+        }
+        .section-title {
+            font-size: 14px;
+            color: #4ecdc4;
+            margin-bottom: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
         .controls {
-            bottom: 24px;
-            left: 50%;
-            transform: translateX(-50%);
+            bottom: 16px;
+            left: 280px;
+            right: 16px;
+            height: 144px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            padding: 48px 24px;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            backdrop-filter: none;
+        }
+        .controls-left {
             display: flex;
             gap: 16px;
-            padding: 16px 24px;
+            justify-content: center;
+            position: absolute;
+            left: 0;
+            right: 100px;
+        }
+        .controls-right {
+            position: absolute;
+            right: 0;
         }
         .btn {
             padding: 14px 32px;
@@ -146,33 +225,6 @@
         .btn.restart:hover:not(:disabled) {
             box-shadow: 0 6px 24px rgba(255, 215, 0, 0.4);
         }
-        .info-panel {
-            right: 16px;
-            top: 80px;
-            width: 260px;
-            padding: 18px;
-        }
-        .info-title {
-            color: #4ecdc4;
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 12px;
-            text-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
-        }
-        .info-text {
-            font-size: 13px;
-            color: #b0b0b0;
-            line-height: 1.6;
-            margin-bottom: 8px;
-        }
-        .info-cost {
-            font-size: 14px;
-            color: #ffd700;
-            font-weight: 600;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid rgba(255, 215, 0, 0.3);
-        }
         .session-info {
             position: fixed;
             bottom: 12px;
@@ -189,7 +241,7 @@
 </head>
 <body>
     <!-- 主菜单界面 -->
-    <div id="mainMenu" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+    <div id="mainMenu" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #1e1e3f 0%, #0d0d1a 100%); z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center;">
         <div style="text-align: center;">
             <h1 style="font-size: 72px; color: #4ecdc4; text-shadow: 0 0 30px rgba(78, 205, 196, 0.8), 0 0 60px rgba(78, 205, 196, 0.5); margin-bottom: 20px;">
                 🏰 XO大作战
@@ -285,8 +337,8 @@
     </div>
 
     <!-- 游戏界面 -->
-    <div id="gameUI" style="display: none;">
-        <canvas id="gameCanvas"></canvas>
+    <div id="gameUI" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 5;">
+        <canvas id="gameCanvas" onclick="console.log('Canvas clicked!')" onmousedown="console.log('Canvas mousedown!')"></canvas>
 
         <div class="ui-panel top-bar">
         <div class="stat">🎯 关卡: <span class="stat-value" id="level">1</span></div>
@@ -326,44 +378,77 @@
         <div id="passwordError" style="color: #e74c3c; text-align: center; margin-top: 10px; font-size: 14px; display: none;">❌ 密码错误</div>
     </div>
     
-    <div class="ui-panel tower-selector">
-        <div class="info-title">防御塔</div>
-        <button class="tower-btn selected" data-type="arrow" onclick="selectTower('arrow')">🏹<span class="tower-count" id="count-arrow">0/3</span></button>
-        <button class="tower-btn" data-type="gun" onclick="selectTower('gun')">🔫<span class="tower-count" id="count-gun">0/3</span></button>
-        <button class="tower-btn" data-type="cannon" onclick="selectTower('cannon')">💣<span class="tower-count" id="count-cannon">0/3</span></button>
-        <button class="tower-btn" data-type="laser" onclick="selectTower('laser')">💥<span class="tower-count" id="count-laser">0/3</span></button>
-        <button class="tower-btn" data-type="ice" onclick="selectTower('ice')">❄️<span class="tower-count" id="count-ice">0/3</span></button>
-        <button class="tower-btn" data-type="barracks" onclick="selectTower('barracks')">🏰<span class="tower-count" id="count-barracks">0/1</span></button>
-    </div>
-    
-    <div class="ui-panel info-panel">
-        <div class="info-title" id="towerName">箭头塔</div>
-        <div class="info-text" id="towerDesc">基本防御塔，射速快但伤害较低</div>
-        <div class="info-cost">💰 成本: <span id="towerCost">20</span> 金币</div>
-        <div class="tower-actions" style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px;">
-            <button class="btn" id="upgradeBtn" onclick="upgradeTower()" style="display: none; padding: 10px 20px; font-size: 13px;">升级</button>
-            <div id="evolutionOptions" style="display: none; flex-direction: column; gap: 6px;">
-                <div style="font-size: 11px; color: #95a5a6; margin-bottom: 4px;">🌟 选择进化形态</div>
-                <button class="btn evolution-btn" id="evolveBtn1" onclick="evolveTower('form1')" style="padding: 8px 12px; font-size: 12px; display: none;">形态1</button>
-                <button class="btn evolution-btn" id="evolveBtn2" onclick="evolveTower('form2')" style="padding: 8px 12px; font-size: 12px; display: none;">形态2</button>
+    <div style="position: fixed; left: 16px; top: 80px; bottom: 20px; width: 250px; display: flex; flex-direction: column; gap: 12px;">
+        <div class="ui-panel tower-list-panel">
+            <div class="tower-section">
+                <div class="section-title">🏰 基础防御塔</div>
+                <div class="tower-grid">
+                    <button class="tower-btn selected" data-type="arrow" onclick="selectTower('arrow')">🏹</button>
+                    <button class="tower-btn" data-type="gun" onclick="selectTower('gun')">🔫</button>
+                    <button class="tower-btn" data-type="cannon" onclick="selectTower('cannon')">💣</button>
+                    <button class="tower-btn" data-type="ice" onclick="selectTower('ice')">❄️</button>
+                </div>
             </div>
-            <button class="btn restart" id="sellBtn" onclick="sellTower()" style="padding: 10px 20px; font-size: 13px;">出售</button>
+
+            <div class="tower-section">
+                <div class="section-title">⚡ 特殊防御塔</div>
+                <div class="tower-grid">
+                    <button class="tower-btn" data-type="laser" onclick="selectTower('laser')">💥</button>
+                    <button class="tower-btn" data-type="barracks" onclick="selectTower('barracks')">🏰</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="ui-panel tower-info-panel">
+            <div class="section-title">📊 所选塔信息</div>
+            <div style="background: rgba(0, 0, 0, 0.3); border-radius: 12px; padding: 16px;">
+                <div style="font-size: 18px; font-weight: bold; margin-bottom: 8px; color: #4ecdc4;" id="towerName">箭头塔</div>
+                <div style="font-size: 13px; color: #b0b0b0; margin-bottom: 12px; line-height: 1.4;" id="towerDesc">基本防御塔，射速快但伤害较低</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+                    <div style="text-align: center; padding: 10px; background: rgba(78, 205, 196, 0.1); border-radius: 8px;">
+                        <div style="color: #95a5a6; font-size: 11px;">💰 成本</div>
+                        <div style="color: #4ecdc4; font-size: 16px; font-weight: bold;" id="towerCost">20</div>
+                    </div>
+                    <div style="text-align: center; padding: 10px; background: rgba(78, 205, 196, 0.1); border-radius: 8px;">
+                        <div style="color: #95a5a6; font-size: 11px;">🎯 射程</div>
+                        <div style="color: #4ecdc4; font-size: 16px; font-weight: bold;" id="towerRange">120</div>
+                    </div>
+                    <div style="text-align: center; padding: 10px; background: rgba(78, 205, 196, 0.1); border-radius: 8px;">
+                        <div style="color: #95a5a6; font-size: 11px;">💥 伤害</div>
+                        <div style="color: #4ecdc4; font-size: 16px; font-weight: bold;" id="towerDamage">8</div>
+                    </div>
+                    <div style="text-align: center; padding: 10px; background: rgba(78, 205, 196, 0.1); border-radius: 8px;">
+                        <div style="color: #95a5a6; font-size: 11px;">⚡ 射速</div>
+                        <div style="color: #4ecdc4; font-size: 16px; font-weight: bold;" id="towerCooldown">2.0/s</div>
+                    </div>
+                </div>
+                <div class="tower-actions" style="display: flex; flex-direction: column; gap: 8px;">
+                    <button class="btn" id="upgradeBtn" onclick="upgradeTower()" style="display: none; padding: 10px 20px; font-size: 13px;">升级</button>
+                    <div id="evolutionOptions" style="display: none; flex-direction: column; gap: 6px;">
+                        <div style="font-size: 11px; color: #95a5a6; margin-bottom: 4px;">🌟 选择进化形态</div>
+                        <button class="btn evolution-btn" id="evolveBtn1" onclick="evolveTower('form1')" style="padding: 8px 12px; font-size: 12px; display: none;">形态1</button>
+                        <button class="btn evolution-btn" id="evolveBtn2" onclick="evolveTower('form2')" style="padding: 8px 12px; font-size: 12px; display: none;">形态2</button>
+                    </div>
+                    <button class="btn restart" id="sellBtn" onclick="sellTower()" style="padding: 10px 20px; font-size: 13px;">出售</button>
+                </div>
+            </div>
         </div>
     </div>
-    
+
     <div class="ui-panel controls">
-        <button class="btn" onclick="startWave()" id="startBtn">开始波数</button>
-        <button class="btn restart" onclick="restartGame()">重新开始</button>
+        <div class="controls-left">
+            <button class="btn" onclick="startWave()" id="startBtn">开始波数</button>
+            <button class="btn restart" onclick="restartGame()">重新开始</button>
+        </div>
+        <div class="controls-right">
+            <button class="btn" onclick="backToMenu()">🏠 返回菜单</button>
+        </div>
     </div>
-    
+
     <div class="session-info">
         Session: <span id="sessionId">loading...</span> |
         Logs: <span id="logCount">0</span>
     </div>
-
-    <button class="btn" onclick="backToMenu()" style="position: fixed; bottom: 24px; right: 16px; padding: 14px 20px; font-size: 14px; z-index: 50;">
-        🏠 返回菜单
-    </button>
     </div>
 
     <script>
@@ -932,8 +1017,8 @@
         }
 
         function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            canvas.width = window.innerWidth - 280 - 16;
+            canvas.height = window.innerHeight - 80 - 176;
             createPath();
         }
         
@@ -982,11 +1067,13 @@
             const y = e.clientY - rect.top;
             
             console.log('🖱️ 画布点击:', { x: Math.round(x), y: Math.round(y) });
-            
+            console.log('🏰 当前塔数量:', gameState.towers.length);
+
             // 检查是否点击了已存在的塔
             for (let i = gameState.towers.length - 1; i >= 0; i--) {
                 const tower = gameState.towers[i];
                 const dist = Math.sqrt((tower.x - x) ** 2 + (tower.y - y) ** 2);
+                console.log('🔍 检查塔距离:', { tower: tower.name, towerPos: { x: tower.x, y: tower.y }, clickPos: { x, y }, dist });
                 if (dist < 25) {
                     gameState.selectedTowerInstance = tower;
                     updateTowerInfo();
@@ -994,20 +1081,28 @@
                     return;
                 }
             }
-            
+            console.log('✅ 检查完所有塔，没有选中任何塔');
+
             // 取消选中塔
             gameState.selectedTowerInstance = null;
             resetTowerInfo();
-            
+
             const gridX = Math.floor(x / GRID_SIZE);
             const gridY = Math.floor(y / GRID_SIZE);
             const towerX = gridX * GRID_SIZE + GRID_SIZE/2;
             const towerY = gridY * GRID_SIZE + GRID_SIZE/2;
             
-            const onPath = gameState.path.some(p => 
+            const onPath = gameState.path.some(p =>
                 Math.abs(p.x - towerX) < GRID_SIZE/2 && Math.abs(p.y - towerY) < GRID_SIZE/2
             );
-            
+
+            console.log('📍 检查放塔条件:', {
+                gridX, gridY, towerX, towerY,
+                selectedTower: gameState.selectedTower,
+                gold: gameState.gold,
+                onPath: onPath
+            });
+
             if (onPath) {
                 console.log('❌ 不能在路径上建造塔');
                 return;
@@ -1359,65 +1454,18 @@
         
         function resetTowerInfo() {
             const tower = towerTypes[gameState.selectedTower];
+            if (!tower) return;
+
             document.getElementById('towerName').textContent = tower.name;
+            document.getElementById('towerDesc').textContent = tower.desc;
+            document.getElementById('towerCost').textContent = tower.cost;
+            document.getElementById('towerRange').textContent = tower.range;
+            document.getElementById('towerDamage').textContent = tower.damage;
+            document.getElementById('towerCooldown').textContent = (1000/tower.cooldown).toFixed(1) + '/s';
             document.getElementById('upgradeBtn').style.display = 'none';
             document.getElementById('evolutionOptions').style.display = 'none';
-            
-            // 显示建造信息
-            let desc = `<div style="margin-bottom: 8px;">${tower.desc}</div>`;
-            desc += `<div style="margin-top: 10px;">`;
-            desc += `<div style="display: flex; justify-content: space-between; margin: 4px 0;">
-                <span style="color: #95a5a6;">💥 基础伤害</span>
-                <span style="color: #e74c3c; font-weight: bold;">${tower.damage}</span>
-            </div>`;
-            desc += `<div style="display: flex; justify-content: space-between; margin: 4px 0;">
-                <span style="color: #95a5a6;">🎯 基础射程</span>
-                <span style="color: #3498db; font-weight: bold;">${tower.range}</span>
-            </div>`;
-            desc += `<div style="display: flex; justify-content: space-between; margin: 4px 0;">
-                <span style="color: #95a5a6;">⚡ 基础射速</span>
-                <span style="color: #2ecc71; font-weight: bold;">${(1000/tower.cooldown).toFixed(2)}/秒</span>
-            </div>`;
-            desc += `<div style="display: flex; justify-content: space-between; margin: 4px 0;">
-                <span style="color: #95a5a6;">⏱️ 基础冷却</span>
-                <span style="color: #f39c12; font-weight: bold;">${tower.cooldown}ms</span>
-            </div>`;
-
-            // 显示数量限制
-            const towerLimit = gameState.selectedTower === 'barracks' ? 1 : 3;
-            const currentCount = gameState.towers.filter(t => t.type === gameState.selectedTower).length;
-            const countColor = currentCount >= towerLimit ? '#e74c3c' : '#95a5a6';
-            desc += `<div style="display: flex; justify-content: space-between; margin: 8px 0; padding-top: 8px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
-                <span style="color: ${countColor};">🔢 数量限制</span>
-                <span style="color: ${countColor}; font-weight: bold;">${currentCount}/${towerLimit}</span>
-            </div>`;
-            desc += `</div>`;
-            
-            // 特殊能力
-            if (tower.type === 'cannon') {
-                desc += `<div style="margin-top: 8px; padding: 6px; background: rgba(255, 215, 0, 0.2); border-radius: 6px; font-size: 12px; color: #ffd700;">
-                    💣 范围爆炸 (半径60)
-                </div>`;
-            } else if (tower.type === 'ice') {
-                desc += `<div style="margin-top: 8px; padding: 6px; background: rgba(52, 152, 219, 0.2); border-radius: 6px; font-size: 12px; color: #3498db;">
-                    ❄️ 减速效果 (2秒, 50%减速)
-                </div>`;
-            } else if (tower.type === 'laser') {
-                desc += `<div style="margin-top: 8px; padding: 6px; background: rgba(155, 89, 182, 0.2); border-radius: 6px; font-size: 12px; color: #9b59b6;">
-                    💥 穿透攻击 (40%伤害穿透)
-                </div>`;
-            } else if (tower.type === 'barracks') {
-                desc += `<div style="margin-top: 8px; padding: 6px; background: rgba(46, 204, 113, 0.2); border-radius: 6px; font-size: 12px; color: #2ecc71;">
-                    ⚔️ 生成士兵在道路上拦截敌人
-                </div>`;
-            }
-            
-            document.getElementById('towerDesc').innerHTML = desc;
-            document.getElementById('towerCost').textContent = `${tower.cost} 💰`;
-            document.getElementById('upgradeBtn').style.display = 'none';
-            document.getElementById('sellBtn').textContent = '出售: 0 💰';
         }
-        
+
         // ==================== 士兵系统 ====================
         function spawnSoldier(tower) {
             // 士兵从路径的最后一个点(终点)开始,向起点方向移动
