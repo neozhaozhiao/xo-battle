@@ -272,6 +272,12 @@
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 4px 16px rgba(78, 205, 196, 0.3);
+            min-height: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.3;
         }
         .btn:hover:not(:disabled) {
             transform: translateY(-2px);
@@ -492,12 +498,9 @@
         </div>
     </div>
 
-    <div class="ui-panel controls" style="flex-direction: column; align-items: center; gap: 10px;">
-        <div style="display: flex; gap: 16px;">
-            <button class="btn" onclick="handleStartButtonClick()" id="startBtn">开始波数</button>
-            <button class="btn restart" onclick="restartGame()">重新开始</button>
-        </div>
-        <div class="auto-countdown" id="autoCountdown" style="display: none; color: #667eea; font-size: 14px; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);"></div>
+    <div class="ui-panel controls">
+        <button class="btn" onclick="handleStartButtonClick()" id="startBtn">开始波数</button>
+        <button class="btn restart" onclick="restartGame()">重新开始</button>
     </div>
 
     <div class="session-info">
@@ -1815,6 +1818,7 @@
         let autoNextWave = false;
         let autoNextWaveTimer = null;
         let autoCountdownSeconds = 0;
+        let countdownInterval = null;
 
         function handleStartButtonClick() {
             if (gameState.waveActive) {
@@ -1833,42 +1837,48 @@
             updateStartButton();
         }
 
-        function cancelAutoCountdown() {
-            if (autoNextWaveTimer) {
-                clearTimeout(autoNextWaveTimer);
-                autoNextWaveTimer = null;
-            }
-            document.getElementById('autoCountdown').style.display = 'none';
-        }
-
         function startAutoCountdown() {
             if (!autoNextWave) return;
 
             autoCountdownSeconds = 2;
-            const countdownEl = document.getElementById('autoCountdown');
-            countdownEl.style.display = 'block';
 
             function updateCountdown() {
-                countdownEl.textContent = `${autoCountdownSeconds} 秒后自动开始`;
+                const btn = document.getElementById('startBtn');
+                btn.innerHTML = `<span>开始波数 ${gameState.wave}</span><span style="font-size: 12px; margin-top: 2px;">${autoCountdownSeconds} 秒后自动开始</span>`;
             }
 
             updateCountdown();
 
-            const countdownInterval = setInterval(() => {
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+
+            countdownInterval = setInterval(() => {
                 autoCountdownSeconds--;
                 if (autoCountdownSeconds <= 0) {
                     clearInterval(countdownInterval);
+                    countdownInterval = null;
                 } else {
                     updateCountdown();
                 }
             }, 1000);
         }
 
+        function cancelAutoCountdown() {
+            if (autoNextWaveTimer) {
+                clearTimeout(autoNextWaveTimer);
+                autoNextWaveTimer = null;
+            }
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+        }
+
         function updateStartButton() {
             const btn = document.getElementById('startBtn');
             if (gameState.waveActive) {
                 // 波数进行中
-                document.getElementById('autoCountdown').style.display = 'none';
                 if (autoNextWave) {
                     btn.textContent = '取消自动下一波';
                     btn.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
