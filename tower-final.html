@@ -476,10 +476,11 @@
 
         // ==================== 日志系统 ====================
         const LOG_SERVER = 'http://localhost:3000';
+        const DEBUG_MODE = new URLSearchParams(window.location.search).has('debug');
         let SESSION_ID = null;
         let logBuffer = [];
         let logCount = 0;
-        
+
         // 原始console方法备份
         const originalConsole = {
             log: console.log,
@@ -487,9 +488,12 @@
             warn: console.warn,
             info: console.info
         };
-        
+
         // 创建会话
         async function createSession() {
+            // 只有在 debug 模式下才创建日志会话
+            if (!DEBUG_MODE) return;
+
             try {
                 const response = await fetch(`${LOG_SERVER}/session`, {
                     method: 'GET'
@@ -516,19 +520,22 @@
         
         // 上报单条日志
         function uploadLog(level, message) {
+            // 只有在 debug 模式下才上报日志
+            if (!DEBUG_MODE) return;
+
             if (!SESSION_ID) {
                 // 如果没有会话ID，先缓冲
                 logBuffer.push({ level, message, timestamp: Date.now() });
                 return;
             }
-            
+
             const logData = {
                 sessionId: SESSION_ID,
                 level: level.toUpperCase(),
                 message: message,
                 timestamp: Date.now()
             };
-            
+
             // 使用sendBeacon确保日志发送
             if (navigator.sendBeacon) {
                 const blob = new Blob([JSON.stringify(logData)], { type: 'application/json' });
@@ -547,13 +554,15 @@
         
         // 批量上报日志
         function uploadBatchLogs() {
+            // 只有在 debug 模式下才上报日志
+            if (!DEBUG_MODE) return;
             if (!SESSION_ID || logBuffer.length === 0) return;
-            
+
             const batchData = {
                 sessionId: SESSION_ID,
                 data: logBuffer
             };
-            
+
             fetch(`${LOG_SERVER}/logs/batch`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -568,7 +577,9 @@
         
         // 更新日志计数显示
         function updateLogCount() {
-            document.getElementById('logCount').textContent = logCount;
+            if (DEBUG_MODE) {
+                document.getElementById('logCount').textContent = logCount;
+            }
         }
         
         // 拦截console方法
@@ -2372,8 +2383,6 @@
             gameState.enemies = gameState.enemies.filter(e => e.alive); // 屏蔽淡出，恢复原始逻辑
 
             let aliveCountAfter = gameState.enemies.filter(e => e.alive).length;
-
-            console.log(`checkEnemyDeaths: killedThisFrame=${killedThisFrame}, aliveBefore=${aliveCountBefore}, aliveAfter=${aliveCountAfter}`);
 
             // 只有在本来有敌人，现在没有敌人的情况下才认为波数完成
             if (killedThisFrame && gameState.waveActive && gameState.hasSpawnedEnemiesThisWave && aliveCountBefore > 0 && aliveCountAfter === 0) { // 屏蔽淡出
