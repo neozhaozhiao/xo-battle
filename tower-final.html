@@ -492,12 +492,13 @@
         </div>
     </div>
 
-    <div class="ui-panel controls">
-        <button class="btn" onclick="handleStartButtonClick()" id="startBtn">开始波数</button>
-        <button class="btn restart" onclick="restartGame()">重新开始</button>
+    <div class="ui-panel controls" style="flex-direction: column; align-items: center; gap: 10px;">
+        <div style="display: flex; gap: 16px;">
+            <button class="btn" onclick="handleStartButtonClick()" id="startBtn">开始波数</button>
+            <button class="btn restart" onclick="restartGame()">重新开始</button>
+        </div>
+        <div class="auto-countdown" id="autoCountdown" style="display: none; color: #667eea; font-size: 14px; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);"></div>
     </div>
-
-    <div class="auto-countdown" id="autoCountdown" style="display: none; margin-top: 10px; color: #667eea; font-size: 14px; text-align: center;"></div>
 
     <div class="session-info">
         Session: <span id="sessionId">loading...</span> |
