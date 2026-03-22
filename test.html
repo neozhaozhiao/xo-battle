@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>塔防游戏测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f3460, #16213e, #1a1a2e);
+            color: white;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        .game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        .game-area {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        .game-canvas {
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            display: block;
+        }
+        .test-info {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            z-index: 1000;
+        }
+        .button {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            border: none;
+            font-weight: bold;
+        }
+        .button:hover {
+            transform: translateX(-50%) scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="test-info" id="test-info">
+            <div>状态: 等待点击</div>
+            <div>点击次数: <span id="click-count">0</span></div>
+            <div>最后坐标: <span id="last-coord">-</span></div>
+        </div>
+        
+        <div class="game-area">
+            <canvas id="game-canvas" class="game-canvas"></canvas>
+        </div>
+        
+        <button class="button" onclick="testButton()">测试按钮</button>
+    </div>
+
+    <script>
+        let clickCount = 0;
+        
+        function init() {
+            console.log('Test page initializing...');
+            
+            const canvas = document.getElementById('game-canvas');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            const ctx = canvas.getContext('2d');
+            
+            // 绘制测试背景
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 绘制测试文字
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '24px Arial';
+            ctx.fillText('点击画布测试', canvas.width/2 - 80, canvas.height/2);
+            
+            console.log('Canvas ready:', canvas.width, 'x', canvas.height);
+            updateStatus('画布已初始化');
+            
+            // 画布点击事件
+            canvas.addEventListener('click', function(e) {
+                clickCount++;
+                const x = e.clientX;
+                const y = e.clientY;
+                
+                console.log('Canvas clicked!', x, y);
+                document.getElementById('click-count').textContent = clickCount;
+                document.getElementById('last-coord').textContent = `${x}, ${y}`;
+                updateStatus(`画布点击: ${x}, ${y}`);
+                
+                // 绘制点击标记
+                ctx.fillStyle = '#ff0000';
+                ctx.beginPath();
+                ctx.arc(x, y, 20, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            // 全局点击测试
+            document.addEventListener('click', function(e) {
+                console.log('Document clicked:', e.target.tagName, 'at', e.clientX, e.clientY);
+            });
+            
+            console.log('Event listeners attached');
+        }
+        
+        function testButton() {
+            console.log('Button clicked!');
+            alert('按钮工作正常！');
+            updateStatus('按钮点击成功');
+        }
+        
+        function updateStatus(text) {
+            document.getElementById('test-info').innerHTML = `
+                <div>状态: ${text}</div>
+                <div>点击次数: <span id="click-count">${clickCount}</span></div>
+                <div>最后坐标: <span id="last-coord">${document.getElementById('last-coord')?.textContent || '-'}</span></div>
+            `;
+        }
+        
+        window.onload = init;
+    </script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "name": "xo-tower-defense",
+  "version": "1.0.0",
+  "description": "塔防游戏 - XO大作战",
+  "main": "log-server.js",
+  "scripts": {
+    "start": "nohup node log-server.js > .codebuddy/server.log 2>&1 & echo $! > .codebuddy/server.pid && echo '日志服务器已启动 (PID: $(cat .codebuddy/server.pid))'",
+    "stop": "if [ -f .codebuddy/server.pid ]; then kill $(cat .codebuddy/server.pid) 2>/dev/null && rm .codebuddy/server.pid && echo '服务器已停止'; else echo '服务器未运行'; fi",
+    "status": "if [ -f .codebuddy/server.pid ] && kill -0 $(cat .codebuddy/server.pid) 2>/dev/null; then echo '服务器运行中 (PID: $(cat .codebuddy/server.pid))'; else echo '服务器未运行'; fi",
+    "restart": "npm run stop && npm start",
+    "dev": "npm start && npm run open",
+    "logs": "ls -la .codebuddy/logs/ && echo -e '\n=== 服务器日志 ===' && tail -20 .codebuddy/server.log 2>/dev/null || echo '无服务器日志'",
+    "clean-logs": "rm -rf .codebuddy/logs/* && echo '.codebuddy/server.log' | xargs rm -f && echo '日志已清理'",
+    "open": "open tower-final.html",
+    "open-clean": "open tower-defense-clean.html",
+    "open-test": "open tower-defense.html"
+  },
+  "keywords": ["game", "tower-defense", "html5", "canvas"],
+  "author": "",
+  "license": "MIT"
+}
