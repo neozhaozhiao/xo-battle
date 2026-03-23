@@ -272,7 +272,8 @@
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 4px 16px rgba(78, 205, 196, 0.3);
-            min-height: 50px;
+            min-height: 70px;
+            height: 70px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -2232,16 +2233,18 @@
                     }
                 });
 
-                if (target) {
-                    tower.lastShot = now;
-                    tower.shots = (tower.shots || 0) + 1;
+            if (target) {
+                tower.lastShot = now;
+                tower.shots = (tower.shots || 0) + 1;
 
-                    // 标记此敌人被这个塔锁定
-                    target.targetedCount = (target.targetedCount || 0) + 1;
+                // 标记此敌人被这个塔锁定
+                target.targetedCount = (target.targetedCount || 0) + 1;
 
-                    // 创建子弹时传递目标引用
-                    createProjectile(tower, target);
-                }
+                console.log('🎯 塔发射:', tower.name || towerTypes[tower.type].name, '类型:', tower.type, '进化:', tower.evolved, '伤害:', tower.damage);
+
+                // 创建子弹时传递目标引用
+                createProjectile(tower, target);
+            }
             });
 
             // 检查敌人死亡(包括被士兵击杀的)
@@ -2326,7 +2329,7 @@
                     break;
                 case 'shotgun':
                     // 霰弹枪发射多个子弹
-                    console.log('🔫 霰弹枪发射，塔类型:', tower.type, '进化类型:', tower.evolutionType);
+                    console.log('🔫 霰弹枪发射，塔类型:', tower.type, '进化类型:', tower.evolutionType, '塔伤害:', tower.damage);
                     const bulletCount = 5;
                     for (let i = 0; i < bulletCount; i++) {
                         const spread = (i - 2) * 0.15; // 扇形散射
@@ -2350,7 +2353,7 @@
                             maxDistance: 800 // 最大飞行距离
                         };
                         gameState.projectiles.push(p);
-                        console.log('  子弹', i + 1, '角度:', angle.toFixed(3), '位置:', p.x, p.y);
+                        console.log('  子弹', i + 1, '角度:', angle.toFixed(3), '位置:', p.x, p.y, '伤害:', p.damage);
                     }
                     console.log('✅ 霰弹枪发射完成，当前子弹总数:', gameState.projectiles.length);
                     return; // 已处理完
@@ -2437,6 +2440,20 @@
                     // 沿角度移动
                     p.x += Math.cos(p.angle) * p.speed;
                     p.y += Math.sin(p.angle) * p.speed;
+
+                    // 霰弹枪在飞行过程中持续检测碰撞
+                    if (p.type === 'shotgun') {
+                        gameState.enemies.forEach(enemy => {
+                            if (!enemy.alive) return;
+                            const dist = Math.sqrt((p.x - enemy.x)**2 + (p.y - enemy.y)**2);
+                            if (dist < enemy.size + 15) {
+                                enemy.health -= p.damage;
+                                console.log('🔫 霰弹枪命中！伤害:', p.damage, '敌人剩余血量:', enemy.health);
+                                applySpecialEffect(p, enemy);
+                                p.active = false; // 子弹命中后消失
+                            }
+                        });
+                    }
                 } else if (p.angle !== undefined) {
                     // 其他使用角度的子弹（如果有）
                     dx = Math.cos(p.angle);
@@ -2519,8 +2536,9 @@
                 gameState.enemies.forEach(enemy => {
                     if (!enemy.alive) return;
                     const dist = Math.sqrt((projectile.x - enemy.x)**2 + (projectile.y - enemy.y)**2);
-                    if (dist < enemy.size + 10) {
+                    if (dist < enemy.size + 15) {
                         enemy.health -= projectile.damage;
+                        console.log('🔫 霰弹枪命中！伤害:', projectile.damage, '敌人剩余血量:', enemy.health);
                         applySpecialEffect(projectile, enemy);
                     }
                 });
