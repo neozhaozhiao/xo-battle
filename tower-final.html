@@ -255,7 +255,8 @@
             background: rgba(78, 205, 196, 0.7);
         }
         .shop-panel {
-            z-index: 100;
+            position: fixed;
+            z-index: 1002;
             display: flex;
             flex-direction: column;
         }
@@ -445,6 +446,9 @@
                 <button class="btn" onclick="startGame()" style="font-size: 24px; padding: 20px 80px; background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%); box-shadow: 0 10px 30px rgba(78, 205, 196, 0.4);">
                     🎮 开始游戏
                 </button>
+                <button class="btn" onclick="openShop()" style="font-size: 20px; padding: 16px 60px; background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%); box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4);">
+                    🏪 升级商店
+                </button>
                 <button class="btn" onclick="showInstructions()" style="font-size: 20px; padding: 16px 60px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);">
                     📖 游戏说明
                 </button>
@@ -456,6 +460,13 @@
             <p style="margin-top: 60px; font-size: 14px; color: #666;">
                 Version 1.0 | Made with ❤️
             </p>
+
+            <div style="margin-top: 40px; padding: 20px; background: rgba(78, 205, 196, 0.1); border-radius: 12px; border: 2px solid rgba(78, 205, 196, 0.3);">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
+                    <span style="font-size: 18px; color: #e0e0e0;">💎 宝石:</span>
+                    <span id="mainMenuGems" style="font-size: 24px; font-weight: bold; color: #ffd700;">100</span>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -623,27 +634,29 @@
 
     <div class="ui-panel controls">
         <button class="btn" onclick="handleStartButtonClick()" id="startBtn">开始波数</button>
-        <button class="btn" onclick="openShop()">🏪 商店</button>
+        <button class="btn restart" onclick="toggleSpeed()" id="speedBtn">⚡ 1x</button>
         <button class="btn restart" onclick="restartGame()">重新开始</button>
-    </div>
-
-    <!-- 商店面板 -->
-    <div class="ui-panel shop-panel" id="shopPanel" style="display: none; right: 16px; top: 80px; bottom: 96px; width: 320px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-            <h3 style="margin: 0; color: #ffd700; font-size: 18px;">🏪 升级商店</h3>
-            <button class="btn" onclick="closeShop()" style="padding: 8px 16px; font-size: 12px;">✕ 关闭</button>
-        </div>
-        <div style="margin-bottom: 12px; padding: 10px; background: rgba(78, 205, 196, 0.1); border-radius: 8px;">
-            <div style="color: #4ecdc4; font-size: 14px; font-weight: 600;">💰 当前金币</div>
-            <div style="color: #ffd700; font-size: 24px; font-weight: bold;" id="shopGold">150</div>
-        </div>
-        <div id="shopItems" style="overflow-y: auto; flex: 1; padding-right: 8px;"></div>
     </div>
 
     <div class="session-info">
         Session: <span id="sessionId">loading...</span> |
         Logs: <span id="logCount">0</span>
     </div>
+    </div>
+
+    <!-- 商店面板 -->
+    <div id="shopPanel" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(26, 26, 46, 0.98); z-index: 1002; padding: 40px; overflow-y: auto;">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+                <h2 style="color: #ffd700; font-size: 48px;">🏪 升级商店</h2>
+                <button class="btn" onclick="closeShop()" style="font-size: 18px; padding: 12px 30px;">✕ 关闭</button>
+            </div>
+            <div style="margin-bottom: 20px; padding: 20px; background: rgba(78, 205, 196, 0.1); border-radius: 15px; border-left: 4px solid #4ecdc4;">
+                <div style="color: #4ecdc4; font-size: 16px; font-weight: 600;">💎 当前宝石</div>
+                <div style="color: #ffd700; font-size: 32px; font-weight: bold;" id="shopGold">100</div>
+            </div>
+            <div id="shopItems" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px;"></div>
+        </div>
     </div>
 
     <script>
@@ -703,24 +716,51 @@
 
         // ==================== 商店系统 ====================
         function openShop() {
-            document.getElementById('shopPanel').style.display = 'flex';
+            console.log('🏪 打开商店');
+            document.getElementById('shopPanel').style.display = 'block';
             updateShopUI();
         }
 
         function closeShop() {
+            console.log('🏪 关闭商店');
             document.getElementById('shopPanel').style.display = 'none';
         }
 
+        function toggleSpeed() {
+            gameSpeed = gameSpeed === 1 ? 2 : 1;
+            document.getElementById('speedBtn').textContent = `⚡ ${gameSpeed}x`;
+            console.log(`⚡ 游戏速度切换为: ${gameSpeed}x`);
+        }
+
         function updateShopUI() {
-            document.getElementById('shopGold').textContent = gameState.gold;
+            console.log('🏪 更新商店UI');
+            // 从 localStorage 加载宝石数量
+            const savedCurrency = localStorage.getItem('xobattle_currency');
+            const currency = savedCurrency ? JSON.parse(savedCurrency) : { gems: 100 };
+            document.getElementById('shopGold').textContent = currency.gems;
 
             const shopItemsContainer = document.getElementById('shopItems');
+            if (!shopItemsContainer) {
+                console.error('❌ 找不到shopItems容器');
+                return;
+            }
             shopItemsContainer.innerHTML = '';
+
+            // 从 localStorage 加载升级数据
+            const savedUpgrades = localStorage.getItem('xobattle_shop_upgrades');
+            const persistentShopUpgrades = savedUpgrades ? JSON.parse(savedUpgrades) : {
+                arrow: { damage: 0, range: 0, cooldown: 0, count: 0 },
+                gun: { damage: 0, range: 0, cooldown: 0, count: 0 },
+                cannon: { damage: 0, range: 0, cooldown: 0, count: 0 },
+                laser: { damage: 0, range: 0, cooldown: 0, count: 0 },
+                ice: { damage: 0, range: 0, cooldown: 0, count: 0 },
+                barracks: { damage: 0, range: 0, cooldown: 0, count: 0 }
+            };
 
             Object.keys(shopConfig).forEach(towerType => {
                 const tower = towerTypes[towerType];
                 const upgrades = shopConfig[towerType].upgrades;
-                const currentUpgrades = gameState.shopUpgrades[towerType];
+                const currentUpgrades = persistentShopUpgrades[towerType];
 
                 // 计算升级后的属性
                 const currentTowerDamage = tower.damage + (currentUpgrades.damage * upgrades.damage.bonusPerLevel);
@@ -781,8 +821,8 @@
                             <button class="shop-item-button upgrade-btn"
                                     onclick="buyUpgrade('${towerType}', '${upgradeType}')"
                                     ${isMaxed ? 'disabled' : ''}
-                                    ${gameState.gold < upgradeCost ? 'disabled' : ''}>
-                                ${isMaxed ? '✓ 已满级' : `💰 ${upgradeCost} 金币`}
+                                    ${currency.gems < upgradeCost ? 'disabled' : ''}>
+                                ${isMaxed ? '✓ 已满级' : `💎 ${upgradeCost} 宝石`}
                             </button>
                         </div>
                     `;
@@ -794,46 +834,60 @@
         }
 
         function buyUpgrade(towerType, upgradeType) {
-            const upgrades = shopConfig[towerType].upgrades[upgradeType];
-            const currentLevel = gameState.shopUpgrades[towerType][upgradeType];
+            // 从 localStorage 加载数据
+            const savedCurrency = localStorage.getItem('xobattle_currency');
+            let currency = savedCurrency ? JSON.parse(savedCurrency) : { gems: 100 };
+
+            const savedUpgrades = localStorage.getItem('xobattle_shop_upgrades');
+            let upgrades = savedUpgrades ? JSON.parse(savedUpgrades) : {
+                arrow: { damage: 0, range: 0, cooldown: 0, count: 0 },
+                gun: { damage: 0, range: 0, cooldown: 0, count: 0 },
+                cannon: { damage: 0, range: 0, cooldown: 0, count: 0 },
+                laser: { damage: 0, range: 0, cooldown: 0, count: 0 },
+                ice: { damage: 0, range: 0, cooldown: 0, count: 0 },
+                barracks: { damage: 0, range: 0, cooldown: 0, count: 0 }
+            };
+
+            const shopUpgrade = shopConfig[towerType].upgrades[upgradeType];
+            const currentLevel = upgrades[towerType][upgradeType];
 
             // 检查是否已达最高等级
-            if (currentLevel >= upgrades.maxLevel) {
+            if (currentLevel >= shopUpgrade.maxLevel) {
                 showToast('⚠️ 该升级已达最高等级!', 'warning');
                 return;
             }
 
             // 计算升级成本
-            const upgradeCost = upgrades.cost * (currentLevel + 1);
+            const upgradeCost = shopUpgrade.cost * (currentLevel + 1);
 
-            // 检查金币是否足够
-            if (gameState.gold < upgradeCost) {
-                showToast('⚠️ 金币不足!', 'error');
+            // 检查宝石是否足够
+            if (currency.gems < upgradeCost) {
+                showToast('⚠️ 宝石不足!', 'error');
                 return;
             }
 
-            // 扣除金币
-            gameState.gold -= upgradeCost;
+            // 扣除宝石
+            currency.gems -= upgradeCost;
 
             // 升级
-            gameState.shopUpgrades[towerType][upgradeType]++;
+            upgrades[towerType][upgradeType]++;
 
-            console.log(`🛒 购买升级: ${towerType} ${upgradeType} → Lv.${gameState.shopUpgrades[towerType][upgradeType]}, 消耗 ${upgradeCost} 金币`);
+            console.log(`🛒 购买升级: ${towerType} ${upgradeType} → Lv.${upgrades[towerType][upgradeType]}, 消耗 ${upgradeCost} 宝石`);
+
+            // 保存到 localStorage
+            localStorage.setItem('xobattle_currency', JSON.stringify(currency));
+            localStorage.setItem('xobattle_shop_upgrades', JSON.stringify(upgrades));
 
             // 更新UI
             updateShopUI();
-            updateTowerInfo();
-            updateUI();
 
-            // 如果是数量升级，更新塔的选择器
-            if (upgradeType === 'count') {
-                const baseLimit = getTowerLimit(towerType);
-                const additionalLimit = gameState.shopUpgrades[towerType].count;
-                const totalCount = gameState.towers.filter(t => t.type === towerType).length;
-                document.getElementById(`count-${towerType}`).textContent = `${totalCount}/${baseLimit + additionalLimit}`;
+            // 更新主菜单宝石显示
+            const mainMenuGems = document.getElementById('mainMenuGems');
+            if (mainMenuGems) {
+                mainMenuGems.textContent = currency.gems;
             }
 
-            showToast(`✅ ${upgrades.name} 升级成功!`, 'success');
+            showToast(`✅ ${shopUpgrade.name} 升级成功!`, 'success');
         }
 
         function getTowerLimit(towerType) {
@@ -1112,7 +1166,9 @@
         // ==================== 游戏逻辑 ====================
         const GRID_SIZE = 50;
         let spawnTimers = []; // 存储敌人生成的定时器
-        
+
+        let gameSpeed = 1; // 游戏速度：1x 或 2x
+
         let gameState = {
             gold: 150,
             wave: 1,
@@ -1591,8 +1647,22 @@
             console.log('📊 画布尺寸:', canvas.width, 'x', canvas.height);
             console.log('📍 路径点数:', gameState.path.length);
 
+            // 初始化宝石显示
+            updateMainMenuGemsDisplay();
+
             // 初始化游戏但不立即开始游戏循环
             // 游戏循环会在点击"开始游戏"后启动
+        }
+
+        // 更新主菜单宝石显示
+        function updateMainMenuGemsDisplay() {
+            const savedCurrency = localStorage.getItem('xobattle_currency');
+            const currency = savedCurrency ? JSON.parse(savedCurrency) : { gems: 0 };
+
+            const mainMenuGems = document.getElementById('mainMenuGems');
+            if (mainMenuGems) {
+                mainMenuGems.textContent = currency.gems;
+            }
         }
 
         function startGameLoop() {
@@ -1608,34 +1678,226 @@
         function createPath() {
             const gridWidth = Math.floor(canvas.width / GRID_SIZE);
             const gridHeight = Math.floor(canvas.height / GRID_SIZE);
-            
+            const level = gameState.level;
+
             gameState.path = [];
-            
-            const startX = Math.floor(gridWidth * 0.1);
-            const startY = Math.floor(gridHeight * 0.5);
-            const midX1 = Math.floor(gridWidth * 0.4);
-            const midX2 = Math.floor(gridWidth * 0.6);
-            const lowY = Math.floor(gridHeight * 0.85);
-            const highY = Math.floor(gridHeight * 0.15);
-            const endX = Math.floor(gridWidth * 0.9);
-            
-            for (let x = startX; x < midX1; x++) {
-                gameState.path.push({ x: x * GRID_SIZE + GRID_SIZE/2, y: startY * GRID_SIZE + GRID_SIZE/2 });
+
+            // 根据关卡生成不同的地图
+            switch(level) {
+                case 1: // 简单的Z字形
+                    const startX1 = Math.floor(gridWidth * 0.1);
+                    const startY1 = Math.floor(gridHeight * 0.5);
+                    const midX1_1 = Math.floor(gridWidth * 0.4);
+                    const midX2_1 = Math.floor(gridWidth * 0.6);
+                    const lowY1 = Math.floor(gridHeight * 0.85);
+                    const highY1 = Math.floor(gridHeight * 0.15);
+                    const endX1 = Math.floor(gridWidth * 0.9);
+
+                    for (let x = startX1; x < midX1_1; x++) gameState.path.push({ x: x * GRID_SIZE + GRID_SIZE/2, y: startY1 * GRID_SIZE + GRID_SIZE/2 });
+                    for (let y = startY1; y < lowY1; y++) gameState.path.push({ x: midX1_1 * GRID_SIZE + GRID_SIZE/2, y: y * GRID_SIZE + GRID_SIZE/2 });
+                    for (let x = midX1_1; x < midX2_1; x++) gameState.path.push({ x: x * GRID_SIZE + GRID_SIZE/2, y: lowY1 * GRID_SIZE + GRID_SIZE/2 });
+                    for (let y = lowY1; y > highY1; y--) gameState.path.push({ x: midX2_1 * GRID_SIZE + GRID_SIZE/2, y: y * GRID_SIZE + GRID_SIZE/2 });
+                    for (let x = midX2_1; x <= endX1; x++) gameState.path.push({ x: x * GRID_SIZE + GRID_SIZE/2, y: highY1 * GRID_SIZE + GRID_SIZE/2 });
+                    console.log('🗺️ 关卡1: Z字形路径');
+                    break;
+
+                case 2: // S形曲线
+                    const startX2 = Math.floor(gridWidth * 0.1);
+                    const startY2 = Math.floor(gridHeight * 0.3);
+                    const midX2 = Math.floor(gridWidth * 0.3);
+                    const midY2 = Math.floor(gridHeight * 0.7);
+                    const midX3 = Math.floor(gridWidth * 0.7);
+                    const midY3 = Math.floor(gridHeight * 0.3);
+                    const endX2 = Math.floor(gridWidth * 0.9);
+                    const endY2 = Math.floor(gridHeight * 0.7);
+
+                    for (let x = startX2; x < midX2; x++) gameState.path.push({ x: x * GRID_SIZE + GRID_SIZE/2, y: startY2 * GRID_SIZE + GRID_SIZE/2 });
+                    for (let y = startY2; y < midY2; y++) gameState.path.push({ x: midX2 * GRID_SIZE + GRID_SIZE/2, y: y * GRID_SIZE + GRID_SIZE/2 });
+                    for (let x = midX2; x < midX3; x++) gameState.path.push({ x: x * GRID_SIZE + GRID_SIZE/2, y: midY2 * GRID_SIZE + GRID_SIZE/2 });
+                    for (let y = midY2; y < midY3; y--) gameState.path.push({ x: midX3 * GRID_SIZE + GRID_SIZE/2, y: y * GRID_SIZE + GRID_SIZE/2 });
+                    for (let x = midX3; x < endX2; x++) gameState.path.push({ x: x * GRID_SIZE + GRID_SIZE/2, y: midY3 * GRID_SIZE + GRID_SIZE/2 });
+                    for (let y = midY3; y <= endY2; y++) gameState.path.push({ x: endX2 * GRID_SIZE + GRID_SIZE/2, y: y * GRID_SIZE + GRID_SIZE/2 });
+                    console.log('🗺️ 关卡2: S形曲线');
+                    break;
+
+                case 3: // 螺旋形
+                    const spiralPoints = [
+                        {x: 2, y: 2}, {x: 15, y: 2}, {x: 15, y: 10}, {x: 5, y: 10}, {x: 5, y: 4}, {x: 12, y: 4}, {x: 12, y: 8}, {x: 7, y: 8}, {x: 7, y: 6}, {x: 10, y: 6}
+                    ];
+                    for (let i = 0; i < spiralPoints.length - 1; i++) {
+                        const p1 = spiralPoints[i];
+                        const p2 = spiralPoints[i + 1];
+                        if (p1.x === p2.x) {
+                            const minY = Math.min(p1.y, p2.y);
+                            const maxY = Math.max(p1.y, p2.y);
+                            for (let y = minY; y <= maxY; y++) {
+                                gameState.path.push({ x: p1.x * GRID_SIZE + GRID_SIZE/2, y: y * GRID_SIZE + GRID_SIZE/2 });
+                            }
+                        } else {
+                            const minX = Math.min(p1.x, p2.x);
+                            const maxX = Math.max(p1.x, p2.x);
+                            for (let x = minX; x <= maxX; x++) {
+                                gameState.path.push({ x: x * GRID_SIZE + GRID_SIZE/2, y: p1.y * GRID_SIZE + GRID_SIZE/2 });
+                            }
+                        }
+                    }
+                    console.log('🗺️ 关卡3: 螺旋形');
+                    break;
+
+                case 4: // 环形路径
+                    const centerX4 = Math.floor(gridWidth * 0.5);
+                    const centerY4 = Math.floor(gridHeight * 0.5);
+                    const radius4 = Math.min(gridWidth, gridHeight) * 0.3;
+                    for (let angle = 0; angle < Math.PI * 2; angle += 0.1) {
+                        const x = centerX4 + Math.cos(angle) * radius4;
+                        const y = centerY4 + Math.sin(angle) * radius4;
+                        gameState.path.push({ x: x * GRID_SIZE + GRID_SIZE/2, y: y * GRID_SIZE + GRID_SIZE/2 });
+                    }
+                    console.log('🗺️ 关卡4: 环形路径');
+                    break;
+
+                case 5: // 复杂迷宫
+                    const mazePoints = [
+                        {x: 1, y: 1}, {x: 18, y: 1}, {x: 18, y: 4}, {x: 3, y: 4}, {x: 3, y: 8}, {x: 16, y: 8}, {x: 16, y: 12}, {x: 5, y: 12}, {x: 5, y: 16}, {x: 14, y: 16}, {x: 14, y: 10}, {x: 7, y: 10}, {x: 7, y: 14}, {x: 12, y: 14}, {x: 12, y: 6}, {x: 9, y: 6}, {x: 9, y: 18}, {x: 19, y: 18}
+                    ];
+                    for (let i = 0; i < mazePoints.length - 1; i++) {
+                        const p1 = mazePoints[i];
+                        const p2 = mazePoints[i + 1];
+                        if (p1.x === p2.x) {
+                            const minY = Math.min(p1.y, p2.y);
+                            const maxY = Math.max(p1.y, p2.y);
+                            for (let y = minY; y <= maxY; y++) {
+                                gameState.path.push({ x: p1.x * GRID_SIZE + GRID_SIZE/2, y: y * GRID_SIZE + GRID_SIZE/2 });
+                            }
+                        } else {
+                            const minX = Math.min(p1.x, p2.x);
+                            const maxX = Math.max(p1.x, p2.x);
+                            for (let x = minX; x <= maxX; x++) {
+                                gameState.path.push({ x: x * GRID_SIZE + GRID_SIZE/2, y: p1.y * GRID_SIZE + GRID_SIZE/2 });
+                            }
+                        }
+                    }
+                    console.log('🗺️ 关卡5: 复杂迷宫');
+                    break;
+
+                case 6: // 波浪形
+                    const startX6 = 1;
+                    const endX6 = Math.floor(gridWidth * 0.95);
+                    const baseY6 = Math.floor(gridHeight * 0.5);
+                    const amplitude = 4;
+                    for (let x = startX6; x <= endX6; x++) {
+                        const y = baseY6 + Math.floor(Math.sin(x * 0.3) * amplitude);
+                        gameState.path.push({ x: x * GRID_SIZE + GRID_SIZE/2, y: y * GRID_SIZE + GRID_SIZE/2 });
+                    }
+                    console.log('🗺️ 关卡6: 波浪形');
+                    break;
+
+                case 7: // 双路径汇聚
+                    const midY7 = Math.floor(gridHeight * 0.5);
+                    for (let x = 1; x < 10; x++) {
+                        gameState.path.push({ x: x * GRID_SIZE + GRID_SIZE/2, y: 2 * GRID_SIZE + GRID_SIZE/2 });
+                    }
+                    for (let y = 2; y < midY7; y++) {
+                        gameState.path.push({ x: 10 * GRID_SIZE + GRID_SIZE/2, y: y * GRID_SIZE + GRID_SIZE/2 });
+                    }
+                    for (let x = 10; x < gridWidth - 5; x++) {
+                        gameState.path.push({ x: x * GRID_SIZE + GRID_SIZE/2, y: midY7 * GRID_SIZE + GRID_SIZE/2 });
+                    }
+                    for (let x = 1; x < 10; x++) {
+                        gameState.path.push({ x: x * GRID_SIZE + GRID_SIZE/2, y: (gridHeight - 3) * GRID_SIZE + GRID_SIZE/2 });
+                    }
+                    for (let y = gridHeight - 3; y > midY7; y--) {
+                        gameState.path.push({ x: 10 * GRID_SIZE + GRID_SIZE/2, y: y * GRID_SIZE + GRID_SIZE/2 });
+                    }
+                    for (let x = 10; x < gridWidth - 5; x++) {
+                        gameState.path.push({ x: x * GRID_SIZE + GRID_SIZE/2, y: midY7 * GRID_SIZE + GRID_SIZE/2 });
+                    }
+                    console.log('🗺️ 关卡7: 双路径汇聚');
+                    break;
+
+                case 8: // U形转弯
+                    const startX8 = 1;
+                    const startY8 = Math.floor(gridHeight * 0.8);
+                    const midX8 = Math.floor(gridWidth * 0.5);
+                    const endX8 = gridWidth - 5;
+                    for (let x = startX8; x < midX8; x++) {
+                        gameState.path.push({ x: x * GRID_SIZE + GRID_SIZE/2, y: startY8 * GRID_SIZE + GRID_SIZE/2 });
+                    }
+                    for (let y = startY8; y > 2; y--) {
+                        gameState.path.push({ x: midX8 * GRID_SIZE + GRID_SIZE/2, y: y * GRID_SIZE + GRID_SIZE/2 });
+                    }
+                    for (let x = midX8; x <= endX8; x++) {
+                        gameState.path.push({ x: x * GRID_SIZE + GRID_SIZE/2, y: 2 * GRID_SIZE + GRID_SIZE/2 });
+                    }
+                    console.log('🗺️ 关卡8: U形转弯');
+                    break;
+
+                case 9: // 之字形密集
+                    const zigzagPoints = [
+                        {x: 1, y: 1}, {x: 5, y: 1}, {x: 5, y: 5}, {x: 9, y: 5}, {x: 9, y: 1}, {x: 13, y: 1}, {x: 13, y: 5}, {x: 17, y: 5}, {x: 17, y: 1}, {x: 21, y: 1}, {x: 21, y: 18}
+                    ];
+                    for (let i = 0; i < zigzagPoints.length - 1; i++) {
+                        const p1 = zigzagPoints[i];
+                        const p2 = zigzagPoints[i + 1];
+                        if (p1.x === p2.x) {
+                            const minY = Math.min(p1.y, p2.y);
+                            const maxY = Math.max(p1.y, p2.y);
+                            for (let y = minY; y <= maxY; y++) {
+                                gameState.path.push({ x: p1.x * GRID_SIZE + GRID_SIZE/2, y: y * GRID_SIZE + GRID_SIZE/2 });
+                            }
+                        } else {
+                            const minX = Math.min(p1.x, p2.x);
+                            const maxX = Math.max(p1.x, p2.x);
+                            for (let x = minX; x <= maxX; x++) {
+                                gameState.path.push({ x: x * GRID_SIZE + GRID_SIZE/2, y: p1.y * GRID_SIZE + GRID_SIZE/2 });
+                            }
+                        }
+                    }
+                    console.log('🗺️ 关卡9: 之字形密集');
+                    break;
+
+                case 10: // 终极挑战
+                    const finalPoints = [
+                        {x: 1, y: 1}, {x: 5, y: 1}, {x: 5, y: 8}, {x: 12, y: 8}, {x: 12, y: 2}, {x: 18, y: 2}, {x: 18, y: 10}, {x: 6, y: 10}, {x: 6, y: 15}, {x: 15, y: 15}, {x: 15, y: 5}, {x: 9, y: 5}, {x: 9, y: 12}, {x: 19, y: 12}, {x: 19, y: 18}
+                    ];
+                    for (let i = 0; i < finalPoints.length - 1; i++) {
+                        const p1 = finalPoints[i];
+                        const p2 = finalPoints[i + 1];
+                        if (p1.x === p2.x) {
+                            const minY = Math.min(p1.y, p2.y);
+                            const maxY = Math.max(p1.y, p2.y);
+                            for (let y = minY; y <= maxY; y++) {
+                                gameState.path.push({ x: p1.x * GRID_SIZE + GRID_SIZE/2, y: y * GRID_SIZE + GRID_SIZE/2 });
+                            }
+                        } else {
+                            const minX = Math.min(p1.x, p2.x);
+                            const maxX = Math.max(p1.x, p2.x);
+                            for (let x = minX; x <= maxX; x++) {
+                                gameState.path.push({ x: x * GRID_SIZE + GRID_SIZE/2, y: p1.y * GRID_SIZE + GRID_SIZE/2 });
+                            }
+                        }
+                    }
+                    console.log('🗺️ 关卡10: 终极挑战');
+                    break;
+
+                default: // 默认路径（超过10关）
+                    const startXDef = Math.floor(gridWidth * 0.1);
+                    const startYDef = Math.floor(gridHeight * 0.5);
+                    const midX1Def = Math.floor(gridWidth * 0.4);
+                    const midX2Def = Math.floor(gridWidth * 0.6);
+                    const lowYDef = Math.floor(gridHeight * 0.85);
+                    const highYDef = Math.floor(gridHeight * 0.15);
+                    const endXDef = Math.floor(gridWidth * 0.9);
+
+                    for (let x = startXDef; x < midX1Def; x++) gameState.path.push({ x: x * GRID_SIZE + GRID_SIZE/2, y: startYDef * GRID_SIZE + GRID_SIZE/2 });
+                    for (let y = startYDef; y < lowYDef; y++) gameState.path.push({ x: midX1Def * GRID_SIZE + GRID_SIZE/2, y: y * GRID_SIZE + GRID_SIZE/2 });
+                    for (let x = midX1Def; x < midX2Def; x++) gameState.path.push({ x: x * GRID_SIZE + GRID_SIZE/2, y: lowYDef * GRID_SIZE + GRID_SIZE/2 });
+                    for (let y = lowYDef; y > highYDef; y--) gameState.path.push({ x: midX2Def * GRID_SIZE + GRID_SIZE/2, y: y * GRID_SIZE + GRID_SIZE/2 });
+                    for (let x = midX2Def; x <= endXDef; x++) gameState.path.push({ x: x * GRID_SIZE + GRID_SIZE/2, y: highYDef * GRID_SIZE + GRID_SIZE/2 });
+                    console.log('🗺️ 默认路径');
             }
-            for (let y = startY; y < lowY; y++) {
-                gameState.path.push({ x: midX1 * GRID_SIZE + GRID_SIZE/2, y: y * GRID_SIZE + GRID_SIZE/2 });
-            }
-            for (let x = midX1; x < midX2; x++) {
-                gameState.path.push({ x: x * GRID_SIZE + GRID_SIZE/2, y: lowY * GRID_SIZE + GRID_SIZE/2 });
-            }
-            for (let y = lowY; y > highY; y--) {
-                gameState.path.push({ x: midX2 * GRID_SIZE + GRID_SIZE/2, y: y * GRID_SIZE + GRID_SIZE/2 });
-            }
-            for (let x = midX2; x <= endX; x++) {
-                gameState.path.push({ x: x * GRID_SIZE + GRID_SIZE/2, y: highY * GRID_SIZE + GRID_SIZE/2 });
-            }
-            
-            console.log('🗺️ 路径更新: 起点(' + startX + ',' + startY + ') → 终点(' + endX + ',' + highY + ')');
+
+            console.log('🗺️ 路径更新完成，共有 ' + gameState.path.length + ' 个路径点');
         }
         
         function handleCanvasHover(e) {
@@ -2182,13 +2444,16 @@
                         const dy = targetPoint.y - soldier.y;
                         const dist = Math.sqrt(dx*dx + dy*dy);
 
+                        // 应用游戏速度倍数
+                        const soldierSpeed = soldier.speed * gameSpeed;
+
                         // 如果到达当前路径点,移到下一个
-                        if (dist < soldier.speed) {
+                        if (dist < soldierSpeed) {
                             soldier.pathIndex--;
                         } else {
                             // 向目标点移动
-                            soldier.x += (dx / dist) * soldier.speed;
-                            soldier.y += (dy / dist) * soldier.speed;
+                            soldier.x += (dx / dist) * soldierSpeed;
+                            soldier.y += (dy / dist) * soldierSpeed;
                         }
                     } else {
                         // 到达起点,士兵消失
@@ -2542,13 +2807,17 @@
                         blockedTimer: 0 // 士兵拦截计时器
                     });
 
-                    gameState.hasSpawnedEnemiesThisWave = true; // 标记已生成过敌人
+                    // 只在最后一个敌人生成时设置标志
+                    if (index === enemiesToSpawn.length - 1) {
+                        gameState.hasSpawnedEnemiesThisWave = true; // 标记所有敌人已生成
+                        console.log('✅ 所有敌人生成定时器已设置，等待敌人出现');
+                    }
                     console.log(`👾 生成敌人: ${type.name} (HP: ${Math.round(type.health * healthMultiplier)}) [Lv.${gameState.level}-波${wave}]`);
                 }, delay);
 
                 spawnTimers.push(timerId);
                 console.log(`⏰ 设置敌人生成定时器: ${enemyType} (${index + 1}/${enemiesToSpawn.length}) 延迟 ${Math.round(delay)}ms`);
-                delay += 500 + Math.random() * 300; // 每个敌人间隔0.5-0.8秒
+                delay += (500 + Math.random() * 300) / gameSpeed; // 每个敌人间隔0.5-0.8秒，受游戏速度影响
             });
 
             console.log(`✅ 已设置 ${enemiesToSpawn.length} 个敌人生成定时器，总延迟约 ${Math.round(delay)}ms`);
@@ -2674,6 +2943,9 @@
                     enemy.blockedTimer--;
                 }
 
+                // 应用游戏速度倍数
+                currentSpeed *= gameSpeed;
+
                 if (enemy.pathIndex < gameState.path.length) {
                     const target = gameState.path[enemy.pathIndex];
                     const dx = target.x - enemy.x;
@@ -2722,7 +2994,7 @@
             
             // 塔攻击 - 智能目标分配
             gameState.towers.forEach(tower => {
-                if (now - tower.lastShot < tower.cooldown) return;
+                if (now - tower.lastShot < tower.cooldown / gameSpeed) return;
 
                 // 兵营塔特殊处理
                 if (tower.type === 'barracks') {
@@ -2958,8 +3230,8 @@
                     }
 
                     // 沿角度移动
-                    p.x += Math.cos(p.angle) * p.speed;
-                    p.y += Math.sin(p.angle) * p.speed;
+                    p.x += Math.cos(p.angle) * p.speed * gameSpeed;
+                    p.y += Math.sin(p.angle) * p.speed * gameSpeed;
 
                     // 霰弹枪在飞行过程中持续检测碰撞
                     if (p.type === 'shotgun') {
@@ -2987,8 +3259,8 @@
                         return false;
                     }
 
-                    p.x += (dx / dist) * p.speed;
-                    p.y += (dy / dist) * p.speed;
+                    p.x += (dx / dist) * p.speed * gameSpeed;
+                    p.y += (dy / dist) * p.speed * gameSpeed;
                 } else {
                     // 普通子弹朝目标移动
                     dx = p.targetX - p.x;
@@ -3002,8 +3274,8 @@
                         return false;
                     }
 
-                    p.x += (dx / dist) * p.speed;
-                    p.y += (dy / dist) * p.speed;
+                    p.x += (dx / dist) * p.speed * gameSpeed;
+                    p.y += (dy / dist) * p.speed * gameSpeed;
                 }
 
                 // 保存轨迹（用于绘制子弹尾迹）
@@ -3111,9 +3383,9 @@
         function updateExplosions() {
             gameState.explosions = gameState.explosions.filter(exp => {
                 if (!exp.active) return false;
-                
-                exp.opacity -= 0.05;
-                exp.radius += 2;
+
+                exp.opacity -= 0.05 * gameSpeed;
+                exp.radius += 2 * gameSpeed;
                 
                 if (exp.opacity <= 0) {
                     exp.active = false;
