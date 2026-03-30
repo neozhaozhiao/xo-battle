@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简化版测试</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #1e1e3f;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        #testDiv {
+            background: rgba(255,255,255,0.1);
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+        }
+        button {
+            padding: 20px 60px;
+            font-size: 24px;
+            background: #4ecdc4;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover {
+            background: #44a08d;
+        }
+        #message {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #ffd700;
+        }
+        #errorList {
+            margin-top: 20px;
+            text-align: left;
+            background: #0a0a0a;
+            padding: 15px;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .error {
+            color: #ff6666;
+            padding: 5px;
+            border-bottom: 1px solid #333;
+        }
+        .ok {
+            color: #66ff66;
+            padding: 5px;
+            border-bottom: 1px solid #333;
+        }
+    </style>
+</head>
+<body>
+    <div id="testDiv">
+        <h1>🔧 简单测试</h1>
+        <p>点击下面的按钮测试</p>
+        <button onclick="test1()">测试1: 弹窗</button>
+        <button onclick="test2()">测试2: 显示文字</button>
+        <button onclick="test3()">测试3: 读取游戏文件</button>
+        <div id="message"></div>
+        <div id="errorList"></div>
+    </div>
+
+    <script>
+        function addMessage(msg, isError = false) {
+            const errorList = document.getElementById('errorList');
+            const div = document.createElement('div');
+            div.className = isError ? 'error' : 'ok';
+            div.textContent = msg;
+            errorList.appendChild(div);
+            document.getElementById('message').textContent = msg;
+        }
+
+        function test1() {
+            try {
+                alert('✅ 测试1成功！JavaScript正常工作');
+                addMessage('✅ 测试1成功');
+            } catch (e) {
+                addMessage('❌ 测试1失败: ' + e.message, true);
+            }
+        }
+
+        function test2() {
+            try {
+                document.getElementById('message').textContent = '✅ 测试2成功！可以修改页面内容';
+                addMessage('✅ 测试2成功');
+            } catch (e) {
+                addMessage('❌ 测试2失败: ' + e.message, true);
+            }
+        }
+
+        function test3() {
+            addMessage('正在尝试读取tower-final.html...');
+
+            fetch('tower-final.html')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('文件无法读取');
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    addMessage('✅ 游戏文件存在，大小: ' + html.length + ' 字符');
+                    
+                    // 检查关键元素
+                    if (html.includes('id="mainMenu"')) {
+                        addMessage('✅ 找到 mainMenu 元素');
+                    } else {
+                        addMessage('❌ 找不到 mainMenu 元素', true);
+                    }
+
+                    if (html.includes('id="gameUI"')) {
+                        addMessage('✅ 找到 gameUI 元素');
+                    } else {
+                        addMessage('❌ 找不到 gameUI 元素', true);
+                    }
+
+                    if (html.includes('function startGame')) {
+                        addMessage('✅ 找到 startGame 函数');
+                    } else {
+                        addMessage('❌ 找不到 startGame 函数', true);
+                    }
+
+                    if (html.includes('function init')) {
+                        addMessage('✅ 找到 init 函数');
+                    } else {
+                        addMessage('❌ 找不到 init 函数', true);
+                    }
+
+                    if (html.includes('onclick="startGame()"')) {
+                        addMessage('✅ 找到开始按钮');
+                    } else {
+                        addMessage('❌ 找不到开始按钮', true);
+                    }
+                })
+                .catch(error => {
+                    addMessage('❌ 读取文件失败: ' + error.message, true);
+                    addMessage('💡 可能需要通过本地服务器打开', false);
+                });
+        }
+
+        // 自动运行测试3
+        setTimeout(test3, 1000);
+    </script>
+</body>
+</html>

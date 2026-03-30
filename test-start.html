@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试游戏启动</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #1e1e3f;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        #testResult {
+            max-width: 600px;
+            padding: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+        button {
+            padding: 15px 40px;
+            font-size: 20px;
+            background: #4ecdc4;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover {
+            background: #44a08d;
+        }
+    </style>
+</head>
+<body>
+    <div id="testResult">
+        <h1>游戏启动测试</h1>
+        <p>点击下面的按钮测试游戏能否正常启动</p>
+        <button onclick="testGameStart()">开始测试</button>
+        <div id="logs" style="margin-top: 20px; font-family: monospace; font-size: 12px;"></div>
+    </div>
+
+    <script>
+        function log(message) {
+            const logs = document.getElementById('logs');
+            const time = new Date().toLocaleTimeString();
+            logs.innerHTML += `<div>[${time}] ${message}</div>`;
+            console.log(message);
+        }
+
+        function testGameStart() {
+            log('🧪 开始测试...');
+
+            // 测试1: 检查tower-final.html能否加载
+            log('📄 尝试加载主游戏文件...');
+            const iframe = document.createElement('iframe');
+            iframe.src = 'tower-final.html';
+            iframe.style.width = '800px';
+            iframe.style.height = '600px';
+            iframe.style.border = '2px solid #4ecdc4';
+            iframe.style.marginTop = '20px';
+            document.body.appendChild(iframe);
+
+            // 等待iframe加载
+            setTimeout(() => {
+                try {
+                    const iframeContent = iframe.contentWindow.document;
+                    log('✅ iframe加载成功');
+
+                    // 检查关键元素是否存在
+                    const mainMenu = iframeContent.getElementById('mainMenu');
+                    const gameUI = iframeContent.getElementById('gameUI');
+                    const startBtn = iframeContent.querySelector('button[onclick="startGame()"]');
+
+                    if (!mainMenu) log('❌ 找不到mainMenu元素');
+                    else log('✅ mainMenu元素存在');
+
+                    if (!gameUI) log('❌ 找不到gameUI元素');
+                    else log('✅ gameUI元素存在');
+
+                    if (!startBtn) log('❌ 找不到开始按钮');
+                    else {
+                        log('✅ 开始按钮存在');
+                        log('👉 请在上面的iframe中点击"开始游戏"按钮测试');
+                    }
+                } catch (e) {
+                    log('❌ 访问iframe内容失败: ' + e.message);
+                    log('💡 这可能是跨域安全限制');
+                    log('💡 请直接在浏览器中打开 tower-final.html 测试');
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>敌人等级系统演示</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: #2c3e50;
+            color: #ecf0f1;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #f39c12;
+            margin-bottom: 30px;
+        }
+        .enemy-rank {
+            background: #34495e;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: transform 0.3s;
+        }
+        .enemy-rank:hover {
+            transform: scale(1.02);
+        }
+        .enemy-icon {
+            font-size: 48px;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #2c3e50;
+        }
+        .enemy-info {
+            flex: 1;
+        }
+        .enemy-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .enemy-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        .stat {
+            background: #2c3e50;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .rank-badge {
+            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        /* 不同等级的样式 */
+        .rank-1 { border-left: 5px solid #95a5a6; }
+        .rank-2 { border-left: 5px solid #2ecc71; }
+        .rank-3 { border-left: 5px solid #3498db; }
+        .rank-4 { border-left: 5px solid #9b59b6; }
+        .rank-5 { border-left: 5px solid #f1c40f; }
+        .rank-1 .enemy-icon { background: #95a5a6; }
+        .rank-2 .enemy-icon { background: #2ecc71; }
+        .rank-3 .enemy-icon { background: #3498db; }
+        .rank-4 .enemy-icon { background: #9b59b6; }
+        .rank-5 .enemy-icon { background: #f1c40f; }
+        .rank-1 .enemy-name { color: #95a5a6; }
+        .rank-2 .enemy-name { color: #2ecc71; }
+        .rank-3 .enemy-name { color: #3498db; }
+        .rank-4 .enemy-name { color: #9b59b6; }
+        .rank-5 .enemy-name { color: #f1c40f; }
+    </style>
+</head>
+<body>
+    <h1>🎮 敌人等级系统（5个等级）</h1>
+    
+    <div class="enemy-rank rank-1">
+        <div class="enemy-icon">⬜</div>
+        <div class="enemy-info">
+            <div class="enemy-name">1级 - 灰色敌人</div>
+            <span class="rank-badge" style="background: #95a5a6;">普通</span>
+            <div class="enemy-stats">
+                <div class="stat">生命值: 50</div>
+                <div class="stat">速度: 2.0</div>
+                <div class="stat">大小: 12px</div>
+                <div class="stat">奖励: 5💎</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="enemy-rank rank-2">
+        <div class="enemy-icon">🟩</div>
+        <div class="enemy-info">
+            <div class="enemy-name">2级 - 绿色敌人</div>
+            <span class="rank-badge" style="background: #2ecc71;">优秀</span>
+            <div class="enemy-stats">
+                <div class="stat">生命值: 75</div>
+                <div class="stat">速度: 2.5</div>
+                <div class="stat">大小: 14px</div>
+                <div class="stat">奖励: 10💎</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="enemy-rank rank-3">
+        <div class="enemy-icon">🟦</div>
+        <div class="enemy-info">
+            <div class="enemy-name">3级 - 蓝色敌人</div>
+            <span class="rank-badge" style="background: #3498db;">精锐</span>
+            <div class="enemy-stats">
+                <div class="stat">生命值: 100</div>
+                <div class="stat">速度: 3.0</div>
+                <div class="stat">大小: 16px</div>
+                <div class="stat">奖励: 20💎</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="enemy-rank rank-4">
+        <div class="enemy-icon">🟪</div>
+        <div class="enemy-info">
+            <div class="enemy-name">4级 - 紫色敌人</div>
+            <span class="rank-badge" style="background: #9b59b6;">精英</span>
+            <div class="enemy-stats">
+                <div class="stat">生命值: 150</div>
+                <div class="stat">速度: 3.5</div>
+                <div class="stat">大小: 18px</div>
+                <div class="stat">奖励: 35💎</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="enemy-rank rank-5">
+        <div class="enemy-icon">🟨</div>
+        <div class="enemy-info">
+            <div class="enemy-name">5级 - 金色敌人</div>
+            <span class="rank-badge" style="background: #f1c40f;">传说</span>
+            <div class="enemy-stats">
+                <div class="stat">生命值: 200</div>
+                <div class="stat">速度: 4.0</div>
+                <div class="stat">大小: 20px</div>
+                <div class="stat">奖励: 50💎</div>
+            </div>
+        </div>
+    </div>
+    
+    <div style="background: #2c3e50; padding: 20px; border-radius: 10px; margin-top: 30px;">
+        <h3 style="color: #f39c12; margin-top: 0;">📊 等级说明</h3>
+        <ul style="line-height: 1.8;">
+            <li>等级越高，生命值、速度、大小和奖励都呈线性增长</li>
+            <li>颜色从灰色渐变到金色，视觉上越来越耀眼</li>
+            <li>5级金色敌人是最强大的敌人类型</li>
+            <li>1级灰色敌人是最基础的敌人类型</li>
+            <li>每提升一级，奖励增加明显，激励玩家挑战更高级敌人</li>
+        </ul>
+    </div>
+    
+    <script>
+        // 敌人等级系统配置（用于游戏代码中）
+        const enemyRankSystem = {
+            ranks: {
+                1: {
+                    name: '灰色敌人',
+                    color: '#95a5a6',  // 灰色
+                    health: 50,
+                    speed: 2.0,
+                    size: 12,
+                    reward: 5,
+                    icon: '⬜',
+                    badge: '普通'
+                },
+                2: {
+                    name: '绿色敌人',
+                    color: '#2ecc71',  // 绿色
+                    health: 75,
+                    speed: 2.5,
+                    size: 14,
+                    reward: 10,
+                    icon: '🟩',
+                    badge: '优秀'
+                },
+                3: {
+                    name: '蓝色敌人',
+                    color: '#3498db',  // 蓝色
+                    health: 100,
+                    speed: 3.0,
+                    size: 16,
+                    reward: 20,
+                    icon: '🟦',
+                    badge: '精锐'
+                },
+                4: {
+                    name: '紫色敌人',
+                    color: '#9b59b6',  // 紫色
+                    health: 150,
+                    speed: 3.5,
+                    size: 18,
+                    reward: 35,
+                    icon: '🟪',
+                    badge: '精英'
+                },
+                5: {
+                    name: '金色敌人',
+                    color: '#f1c40f',  // 金色
+                    health: 200,
+                    speed: 4.0,
+                    size: 20,
+                    reward: 50,
+                    icon: '🟨',
+                    badge: '传说'
+                }
+            },
+            
+            // 根据等级获取敌人属性
+            getEnemyByRank(rank) {
+                return this.ranks[rank] || this.ranks[1];
+            },
+            
+            // 根据等级区间获取敌人（用于随机生成）
+            getRandomEnemy(minRank = 1, maxRank = 5) {
+                const rank = Math.floor(Math.random() * (maxRank - minRank + 1)) + minRank;
+                return this.getEnemyByRank(rank);
+            },
+            
+            // 获取所有等级
+            getAllRanks() {
+                return Object.keys(this.ranks).map(key => ({
+                    rank: parseInt(key),
+                    ...this.ranks[key]
+                }));
+            }
+        };
+        
+        // 导出配置（可用于其他文件引用）
+        console.log('🎮 敌人等级系统已加载');
+        console.log('使用方式: enemyRankSystem.getEnemyByRank(5) // 获取5级金色敌人');
+        console.log('所有等级:', enemyRankSystem.getAllRanks());
+    </script>
+</body>
+</html>

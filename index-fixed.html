@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>修复版游戏</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1e1e3f 0%, #0d0d1a 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        #mainMenu {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+        h1 {
+            font-size: 72px;
+            color: #4ecdc4;
+            margin-bottom: 20px;
+            text-shadow: 0 0 30px rgba(78, 205, 196, 0.8);
+        }
+        p {
+            font-size: 24px;
+            color: #e0e0e0;
+            margin-bottom: 60px;
+        }
+        button {
+            padding: 20px 80px;
+            font-size: 24px;
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            margin: 10px;
+            box-shadow: 0 10px 30px rgba(78, 205, 196, 0.4);
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div id="mainMenu">
+        <h1>🏰 XO大作战</h1>
+        <p>塔防战略游戏</p>
+        <button onclick="startGame()">🎮 开始游戏</button>
+        <button onclick="alert('测试成功！JavaScript正常工作')">🧪 测试按钮</button>
+    </div>
+
+    <script>
+        function startGame() {
+            console.log('startGame 被调用');
+            alert('✅ 开始游戏按钮点击成功！');
+            document.getElementById('mainMenu').innerHTML = '<h1>🎮 游戏正在加载...</h1><p>请稍候</p>';
+
+            // 延迟1秒后加载原始游戏
+            setTimeout(function() {
+                window.location.href = 'tower-final.html';
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

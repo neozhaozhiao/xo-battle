@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XO大作战 - 工作版</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #1e1e3f 0%, #0d0d1a 100%);
+            color: white;
+            min-height: 100vh;
+        }
+
+        /* 主菜单 */
+        #mainMenu {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 72px;
+            color: #4ecdc4;
+            text-shadow: 0 0 30px rgba(78, 205, 196, 0.8);
+            margin-bottom: 20px;
+        }
+
+        p {
+            font-size: 24px;
+            color: #e0e0e0;
+            margin-bottom: 60px;
+        }
+
+        button {
+            padding: 20px 80px;
+            font-size: 24px;
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            margin: 10px;
+            box-shadow: 0 10px 30px rgba(78, 205, 196, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(78, 205, 196, 0.6);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        /* 游戏界面 */
+        #gameUI {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #1e1e3f;
+        }
+
+        /* 状态提示 */
+        #statusMessage {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: #4ecdc4;
+            padding: 40px 60px;
+            border-radius: 20px;
+            font-size: 32px;
+            border: 3px solid #4ecdc4;
+            z-index: 2000;
+            display: none;
+        }
+
+        /* 画布 */
+        canvas {
+            display: block;
+            cursor: crosshair;
+        }
+
+        /* 顶部信息栏 */
+        .info-bar {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            right: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(26, 26, 46, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(78, 205, 196, 0.3);
+            border-radius: 16px;
+            padding: 16px 24px;
+            z-index: 10;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 18px;
+        }
+
+        .icon { font-size: 24px; }
+        .value { font-weight: bold; color: #4ecdc4; }
+
+        /* 返回按钮 */
+        .back-btn {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%);
+            padding: 10px 24px;
+            font-size: 16px;
+            margin: 0;
+        }
+
+        .back-btn:hover {
+            background: linear-gradient(135deg, #ff5555 0%, #dd4444 100%);
+        }
+    </style>
+</head>
+<body>
+    <!-- 主菜单 -->
+    <div id="mainMenu">
+        <h1>🏰 XO大作战</h1>
+        <p>塔防战略游戏</p>
+        <button id="startBtn">🎮 开始游戏</button>
+        <div style="margin-top: 40px; padding: 20px; background: rgba(78, 205, 196, 0.1); border-radius: 12px;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
+                <span style="font-size: 18px;">💎 宝石:</span>
+                <span id="mainMenuGems" style="font-size: 24px; font-weight: bold; color: #ffd700;">100</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 游戏界面 -->
+    <div id="gameUI">
+        <div class="info-bar">
+            <div class="info-item">
+                <span class="icon">💰</span>
+                <span>金币: <span class="value" id="goldDisplay">150</span></span>
+            </div>
+            <div class="info-item">
+                <span class="icon">🌊</span>
+                <span>波数: <span class="value" id="waveDisplay">1</span></span>
+            </div>
+            <div class="info-item">
+                <span class="icon">❤️</span>
+                <span>生命: <span class="value" id="healthDisplay">100</span></span>
+            </div>
+            <button class="back-btn" id="backBtn">← 返回主菜单</button>
+        </div>
+
+        <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <!-- 状态消息 -->
+    <div id="statusMessage"></div>
+
+    <script>
+        // 游戏状态
+        const gameState = {
+            gold: 150,
+            wave: 1,
+            health: 100,
+            isRunning: false
+        };
+
+        // DOM 元素
+        const mainMenu = document.getElementById('mainMenu');
+        const gameUI = document.getElementById('gameUI');
+        const startBtn = document.getElementById('startBtn');
+        const backBtn = document.getElementById('backBtn');
+        const statusMessage = document.getElementById('statusMessage');
+
+        // 显示状态消息
+        function showStatus(message, duration = 2000) {
+            console.log('📢', message);
+            statusMessage.textContent = message;
+            statusMessage.style.display = 'block';
+            setTimeout(() => {
+                statusMessage.style.display = 'none';
+            }, duration);
+        }
+
+        // 开始游戏
+        function startGame() {
+            console.log('🎮 startGame 被调用');
+            showStatus('🎮 正在启动游戏...');
+
+            setTimeout(() => {
+                console.log('🔄 切换到游戏界面');
+                mainMenu.style.display = 'none';
+                gameUI.style.display = 'block';
+                showStatus('✅ 游戏已启动！');
+                gameState.isRunning = true;
+
+                // 初始化画布
+                initCanvas();
+            }, 500);
+        }
+
+        // 返回主菜单
+        function backToMenu() {
+            console.log('🏠 返回主菜单');
+            gameUI.style.display = 'none';
+            mainMenu.style.display = 'flex';
+            gameState.isRunning = false;
+        }
+
+        // 初始化画布
+        function initCanvas() {
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+
+            // 设置画布大小
+            canvas.width = window.innerWidth - 32;
+            canvas.height = window.innerHeight - 80;
+            canvas.style.top = '80px';
+            canvas.style.left = '16px';
+
+            // 绘制简单的游戏场景
+            ctx.fillStyle = '#1e1e3f';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 绘制一些文字
+            ctx.fillStyle = '#4ecdc4';
+            ctx.font = '48px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('🏰 XO大作战', canvas.width / 2, canvas.height / 2 - 50);
+
+            ctx.fillStyle = '#e0e0e0';
+            ctx.font = '24px Arial';
+            ctx.fillText('游戏已启动！点击"返回主菜单"退出', canvas.width / 2, canvas.height / 2 + 20);
+
+            // 绘制宝石数量
+            ctx.fillStyle = '#ffd700';
+            ctx.font = '32px Arial';
+            ctx.fillText(`💎 宝石: ${document.getElementById('mainMenuGems').textContent}`, canvas.width / 2, canvas.height / 2 + 80);
+
+            console.log('✅ 画布初始化完成');
+        }
+
+        // 使用 addEventListener 绑定事件（不使用内联onclick）
+        startBtn.addEventListener('click', startGame);
+        backBtn.addEventListener('click', backToMenu);
+
+        // 页面加载完成
+        window.addEventListener('load', () => {
+            console.log('✅ 页面加载完成');
+            console.log('🎮 按钮已绑定事件');
+
+            // 加载宝石数量
+            const saved = localStorage.getItem('xobattle_currency');
+            if (saved) {
+                try {
+                    const currency = JSON.parse(saved);
+                    document.getElementById('mainMenuGems').textContent = currency.gems || 100;
+                } catch (e) {
+                    console.error('加载宝石数据失败', e);
+                }
+            }
+        });
+
+        // 窗口大小改变
+        window.addEventListener('resize', () => {
+            if (gameState.isRunning) {
+                initCanvas();
+            }
+        });
+    </script>
+</body>
+</html>

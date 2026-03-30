@@ -443,7 +443,7 @@
             </p>
 
             <div style="display: flex; flex-direction: column; gap: 20px; align-items: center;">
-                <button class="btn" onclick="startGame()" style="font-size: 24px; padding: 20px 80px; background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%); box-shadow: 0 10px 30px rgba(78, 205, 196, 0.4);">
+                <button class="btn" onclick="testAndStartGame()" style="font-size: 24px; padding: 20px 80px; background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%); box-shadow: 0 10px 30px rgba(78, 205, 196, 0.4);">
                     🎮 开始游戏
                 </button>
                 <button class="btn" onclick="openShop()" style="font-size: 20px; padding: 16px 60px; background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%); box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4);">
@@ -460,13 +460,6 @@
             <p style="margin-top: 60px; font-size: 14px; color: #666;">
                 Version 1.0 | Made with ❤️
             </p>
-
-            <div style="margin-top: 40px; padding: 20px; background: rgba(78, 205, 196, 0.1); border-radius: 12px; border: 2px solid rgba(78, 205, 196, 0.3);">
-                <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
-                    <span style="font-size: 18px; color: #e0e0e0;">💎 宝石:</span>
-                    <span id="mainMenuGems" style="font-size: 24px; font-weight: bold; color: #ffd700;">100</span>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -679,18 +672,94 @@
         }
 
         // ==================== 主界面系统 ====================
-        function startGame() {
-            document.getElementById('mainMenu').style.display = 'none';
-            document.getElementById('gameUI').style.display = 'block';
+        function testAndStartGame() {
+            console.log('🔍 测试: 按钮被点击了');
+            console.log('✅ 按钮点击成功！JavaScript正在工作...');
+
+            // 在页面上显示状态
+            showStatus('✅ 按钮点击成功！正在启动游戏...');
+
+            try {
+                if (typeof startGame === 'function') {
+                    console.log('✅ startGame 函数存在');
+                    setTimeout(() => {
+                        startGame();
+                    }, 100);
+                } else {
+                    console.error('❌ startGame 函数不存在');
+                    showStatus('❌ 错误: startGame 函数未找到');
+                }
+            } catch (error) {
+                console.error('❌ 启动游戏时出错:', error);
+                showStatus('❌ 启动游戏出错: ' + error.message);
+            }
+        }
+
+        // 在主菜单上显示状态
+        function showStatus(message) {
+            const mainMenu = document.getElementById('mainMenu');
+            if (!mainMenu) return;
+
+            let statusDiv = document.getElementById('gameStatus');
+            if (!statusDiv) {
+                statusDiv = document.createElement('div');
+                statusDiv.id = 'gameStatus';
+                statusDiv.style.cssText = 'position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.9); color: white; padding: 20px 40px; border-radius: 10px; z-index: 2000; font-size: 18px; border: 2px solid #4ecdc4;';
+                document.body.appendChild(statusDiv);
+            }
+            statusDiv.textContent = message;
+            console.log('📢 ' + message);
+        }
+
+        async function startGame() {
+            console.log('🎮 startGame 函数开始执行');
+            showStatus('🎮 正在启动游戏...');
+
+            const mainMenu = document.getElementById('mainMenu');
+            const gameUI = document.getElementById('gameUI');
+
+            if (!mainMenu) {
+                console.error('❌ 找不到 mainMenu 元素');
+                showStatus('❌ 错误: 找不到主菜单');
+                return;
+            }
+
+            if (!gameUI) {
+                console.error('❌ 找不到 gameUI 元素');
+                showStatus('❌ 错误: 找不到游戏界面');
+                return;
+            }
+
+            showStatus('✅ 找到所有元素，正在切换界面...');
+            mainMenu.style.display = 'none';
+            gameUI.style.display = 'block';
             console.log('🎮 游戏开始!');
 
-            // 初始化游戏
-            init();
+            try {
+                // 初始化游戏（等待异步操作完成）
+                showStatus('🚀 正在初始化游戏...');
+                console.log('🚀 开始初始化游戏...');
+                await init();
+                showStatus('✅ 游戏初始化完成！');
+                console.log('✅ 游戏初始化完成');
 
-            // 启动游戏循环
-            setTimeout(() => {
-                startGameLoop();
-            }, 100);
+                // 移除状态提示
+                setTimeout(() => {
+                    const statusDiv = document.getElementById('gameStatus');
+                    if (statusDiv) {
+                        statusDiv.style.display = 'none';
+                    }
+                }, 2000);
+
+                // 启动游戏循环
+                setTimeout(() => {
+                    console.log('🎬 启动游戏循环...');
+                    startGameLoop();
+                }, 100);
+            } catch (error) {
+                console.error('❌ 游戏初始化失败:', error);
+                showStatus('❌ 游戏启动失败: ' + error.message);
+            }
         }
 
         function showInstructions() {
@@ -736,7 +805,7 @@
             console.log('🏪 更新商店UI');
             // 从 localStorage 加载宝石数量
             const savedCurrency = localStorage.getItem('xobattle_currency');
-            const currency = savedCurrency ? JSON.parse(savedCurrency) : { gems: 100 };
+            const currency = savedCurrency ? JSON.parse(savedCurrency) : { gems: 0 };
             document.getElementById('shopGold').textContent = currency.gems;
 
             const shopItemsContainer = document.getElementById('shopItems');
@@ -836,7 +905,7 @@
         function buyUpgrade(towerType, upgradeType) {
             // 从 localStorage 加载数据
             const savedCurrency = localStorage.getItem('xobattle_currency');
-            let currency = savedCurrency ? JSON.parse(savedCurrency) : { gems: 100 };
+            let currency = savedCurrency ? JSON.parse(savedCurrency) : { gems: 0 };
 
             const savedUpgrades = localStorage.getItem('xobattle_shop_upgrades');
             let upgrades = savedUpgrades ? JSON.parse(savedUpgrades) : {
@@ -1546,61 +1615,55 @@
         };
 
         const enemyTypes = {
-            normal: {
-                name: '普通敌人',
-                health: 20,
+            // 等级1 - 灰色敌人
+            gray: {
+                name: '灰色敌人',
+                health: 50,
                 speed: 2.5,
-                color: '#ff6b6b',
-                size: 15,
-                reward: 5,
-                icon: '👾'
-            },
-            fast: {
-                name: '快速敌人',
-                health: 15,
-                speed: 4.5,
-                color: '#ffd93d',
+                color: '#808080',
                 size: 12,
-                reward: 8,
-                icon: '⚡'
+                reward: 5,
+                icon: '🔘'
             },
-            tank: {
-                name: '坦克敌人',
-                health: 80,
-                speed: 1.2,
-                color: '#6b5b95',
-                size: 22,
-                reward: 15,
-                icon: '🛡️'
-            },
-            swarm: {
-                name: '群敌',
-                health: 8,
+            // 等级2 - 绿色敌人
+            green: {
+                name: '绿色敌人',
+                health: 75,
                 speed: 3.0,
-                color: '#95e1d3',
-                size: 10,
-                reward: 3,
-                icon: '🦗'
-            },
-            boss: {
-                name: 'BOSS',
-                health: 300,
-                speed: 0.8,
-                color: '#e74c3c',
-                size: 30,
-                reward: 50,
-                icon: '👹'
-            },
-            healer: {
-                name: '治疗者',
-                health: 25,
-                speed: 1.8,
-                color: '#2ecc71',
-                size: 16,
+                color: '#4caf50',
+                size: 14,
                 reward: 10,
-                icon: '💚',
-                healRange: 100,
-                healPower: 5
+                icon: '🟢'
+            },
+            // 等级3 - 蓝色敌人
+            blue: {
+                name: '蓝色敌人',
+                health: 100,
+                speed: 3.5,
+                color: '#2196f3',
+                size: 16,
+                reward: 20,
+                icon: '🔵'
+            },
+            // 等级4 - 紫色敌人
+            purple: {
+                name: '紫色敌人',
+                health: 150,
+                speed: 4.0,
+                color: '#9b59b6',
+                size: 18,
+                reward: 35,
+                icon: '🟣'
+            },
+            // 等级5 - 金色敌人
+            gold: {
+                name: '金色敌人',
+                health: 200,
+                speed: 5.0,
+                color: '#ffd700',
+                size: 22,
+                reward: 50,
+                icon: '🟡'
             }
         };
         
@@ -2480,6 +2543,16 @@
                 gameState.wave++;
                 gameState.gold += 50;
 
+                // 发放宝石奖励（每波结束后）
+                const gemsReward = Math.floor(10 + (gameState.wave * 5));
+                const savedCurrency = localStorage.getItem('xobattle_currency');
+                let currency = savedCurrency ? JSON.parse(savedCurrency) : { gems: 0 };
+                currency.gems += gemsReward;
+                localStorage.setItem('xobattle_currency', JSON.stringify(currency));
+                updateShopUI();
+                updateMainMenuGemsDisplay();
+                showToast(`🎉 第${gameState.wave}波完成！获得💎 ${gemsReward} 宝石`, 'success', 3000);
+
                 // 检查当前关卡是否完成
                 const currentLevel = levels[gameState.level];
                 if (gameState.wave > currentLevel.waves) {
@@ -2695,55 +2768,49 @@
             gameState.hasSpawnedEnemiesThisWave = false; // 重置标志
             updateStartButton();
 
-            // 根据波数生成不同类型的敌人
+            // 根据波数生成不同等级的敌人
             const wave = gameState.wave;
             const enemiesToSpawn = [];
 
             // 基础敌人数量
             let baseEnemyCount = 15 + wave * 5;
-            
-            // 波数1-3: 只有普通敌人
-            if (wave <= 3) {
-                for (let i = 0; i < baseEnemyCount; i++) {
-                    enemiesToSpawn.push('normal');
-                }
+
+            // 根据波数决定敌人等级
+            let maxEnemyRank = 1;
+            if (wave <= 3) maxEnemyRank = 1;  // 1-3波: 只有灰色
+            else if (wave <= 6) maxEnemyRank = 2;  // 4-6波: 加入绿色
+            else if (wave <= 10) maxEnemyRank = 3;  // 7-10波: 加入蓝色
+            else if (wave <= 15) maxEnemyRank = 4;  // 11-15波: 加入紫色
+            else maxEnemyRank = 5;  // 16波+: 加入金色
+
+            // 生成敌人，按等级随机分布
+            for (let i = 0; i < baseEnemyCount; i++) {
+                // 随机选择等级，偏向低等级敌人
+                let rank;
+                const rand = Math.random();
+                if (rand < 0.5) rank = 1;  // 50% 概率灰色
+                else if (rand < 0.75) rank = 2;  // 25% 概率绿色
+                else if (rand < 0.9) rank = 3;  // 15% 概率蓝色
+                else if (rand < 0.97) rank = 4;  // 7% 概率紫色
+                else rank = 5;  // 3% 概率金色
+
+                // 确保不超过当前波数允许的最高等级
+                if (rank > maxEnemyRank) rank = maxEnemyRank;
+
+                // 根据等级选择敌人类型
+                if (rank === 1) enemiesToSpawn.push('gray');
+                else if (rank === 2) enemiesToSpawn.push('green');
+                else if (rank === 3) enemiesToSpawn.push('blue');
+                else if (rank === 4) enemiesToSpawn.push('purple');
+                else if (rank === 5) enemiesToSpawn.push('gold');
             }
-            // 波数4-6: 加入快速敌人
-            else if (wave <= 6) {
-                for (let i = 0; i < baseEnemyCount; i++) {
-                    enemiesToSpawn.push(i % 3 === 0 ? 'fast' : 'normal');
-                }
-            }
-            // 波数7-10: 加入坦克敌人
-            else if (wave <= 10) {
-                for (let i = 0; i < baseEnemyCount; i++) {
-                    if (i % 5 === 0) enemiesToSpawn.push('tank');
-                    else if (i % 3 === 0) enemiesToSpawn.push('fast');
-                    else enemiesToSpawn.push('normal');
-                }
-            }
-            // 波数11-15: 加入群敌
-            else if (wave <= 15) {
-                for (let i = 0; i < baseEnemyCount; i++) {
-                    if (i % 5 === 0) enemiesToSpawn.push('tank');
-                    else if (i % 4 === 0) enemiesToSpawn.push('swarm');
-                    else if (i % 3 === 0) enemiesToSpawn.push('fast');
-                    else enemiesToSpawn.push('normal');
-                }
-            }
-            // 波数16-20: 加入治疗者
-            else if (wave <= 20) {
-                for (let i = 0; i < baseEnemyCount; i++) {
-                    if (i % 6 === 0) enemiesToSpawn.push('tank');
-                    else if (i % 5 === 0) enemiesToSpawn.push('healer');
-                    else if (i % 4 === 0) enemiesToSpawn.push('swarm');
-                    else if (i % 3 === 0) enemiesToSpawn.push('fast');
-                    else enemiesToSpawn.push('normal');
-                }
-            }
-            // 波数21+: 加入BOSS
-            else {
+
+            // 波数21+: 每10波加入一个BOSS
+            if (wave >= 21 && wave % 10 === 0) {
                 enemiesToSpawn.push('boss');
+            } else {
+                // 如果不是BOSS波，生成普通等级敌人
+                // 第2819行代码已删除（它是重复代码）
                 for (let i = 0; i < baseEnemyCount; i++) {
                     if (i % 6 === 0) enemiesToSpawn.push('tank');
                     else if (i % 5 === 0) enemiesToSpawn.push('healer');
@@ -3424,6 +3491,16 @@
                 gameState.waveActive = false;
                 gameState.wave++;
                 gameState.gold += 50;
+
+                // 发放宝石奖励（每波结束后）
+                const gemsReward = Math.floor(10 + (gameState.wave * 5));
+                const savedCurrency = localStorage.getItem('xobattle_currency');
+                let currency = savedCurrency ? JSON.parse(savedCurrency) : { gems: 0 };
+                currency.gems += gemsReward;
+                localStorage.setItem('xobattle_currency', JSON.stringify(currency));
+                updateShopUI();
+                updateMainMenuGemsDisplay();
+                showToast(`🎉 第${gameState.wave}波完成！获得💎 ${gemsReward} 宝石`, 'success', 3000);
 
                 // 检查当前关卡是否完成
                 const currentLevel = levels[gameState.level];

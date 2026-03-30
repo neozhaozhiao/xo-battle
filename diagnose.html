@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏诊断工具</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1e1e3f;
+            color: #00ff00;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #4ecdc4;
+            margin-bottom: 20px;
+            font-size: 32px;
+        }
+        .section {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid #4ecdc4;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .section h2 {
+            color: #ffd700;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        .btn {
+            background: #4ecdc4;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        .btn:hover {
+            background: #44a08d;
+        }
+        .log {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 5px;
+            padding: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+        .log div {
+            margin-bottom: 5px;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        .log .error {
+            background: rgba(255,0,0,0.2);
+            color: #ff6666;
+        }
+        .log .success {
+            background: rgba(0,255,0,0.2);
+            color: #66ff66;
+        }
+        .log .info {
+            background: rgba(0,150,255,0.2);
+            color: #66ccff;
+        }
+        .status {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .status-item {
+            background: rgba(255,255,255,0.1);
+            padding: 10px 15px;
+            border-radius: 5px;
+        }
+        .status-item.ok {
+            border-left: 4px solid #00ff00;
+        }
+        .status-item.fail {
+            border-left: 4px solid #ff0000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 XO大作战 - 游戏诊断工具</h1>
+
+        <div class="section">
+            <h2>1. 基础检查</h2>
+            <button class="btn" onclick="runBasicChecks()">运行基础检查</button>
+            <div class="status" id="basicStatus"></div>
+        </div>
+
+        <div class="section">
+            <h2>2. 直接启动游戏</h2>
+            <button class="btn" onclick="openGameDirectly()">直接打开游戏</button>
+            <button class="btn" onclick="testGameFunctions()">测试游戏函数</button>
+            <div class="log" id="gameLog"></div>
+        </div>
+
+        <div class="section">
+            <h2>3. 浏览器信息</h2>
+            <div class="status-item ok">
+                浏览器: <span id="browserInfo"></span>
+            </div>
+            <div class="status-item ok">
+                屏幕分辨率: <span id="screenInfo"></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 显示浏览器信息
+        document.getElementById('browserInfo').textContent = navigator.userAgent;
+        document.getElementById('screenInfo').textContent = `${window.screen.width} x ${window.screen.height}`;
+
+        function addLog(message, type = 'info') {
+            const logDiv = document.getElementById('gameLog');
+            const time = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = type;
+            entry.textContent = `[${time}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(`[${type}] ${message}`);
+        }
+
+        function runBasicChecks() {
+            addLog('🔍 开始运行基础检查...', 'info');
+
+            const statusDiv = document.getElementById('basicStatus');
+            statusDiv.innerHTML = '';
+
+            const checks = [
+                {
+                    name: 'JavaScript是否启用',
+                    test: () => typeof window !== 'undefined',
+                    ok: true
+                },
+                {
+                    name: 'localStorage是否可用',
+                    test: () => {
+                        try {
+                            localStorage.setItem('test', 'test');
+                            localStorage.removeItem('test');
+                            return true;
+                        } catch (e) {
+                            return false;
+                        }
+                    },
+                    ok: true
+                },
+                {
+                    name: 'requestAnimationFrame是否可用',
+                    test: () => typeof requestAnimationFrame !== 'undefined',
+                    ok: true
+                },
+                {
+                    name: 'Canvas是否支持',
+                    test: () => {
+                        const canvas = document.createElement('canvas');
+                        return typeof canvas.getContext === 'function';
+                    },
+                    ok: true
+                }
+            ];
+
+            checks.forEach(check => {
+                const result = check.test();
+                const item = document.createElement('div');
+                item.className = `status-item ${result === check.ok ? 'ok' : 'fail'}`;
+                item.textContent = `${check.name}: ${result ? '✅ 通过' : '❌ 失败'}`;
+                statusDiv.appendChild(item);
+                addLog(`${check.name}: ${result ? '通过' : '失败'}`, result ? 'success' : 'error');
+            });
+
+            addLog('✅ 基础检查完成', 'success');
+        }
+
+        function openGameDirectly() {
+            addLog('🎮 尝试直接打开游戏...', 'info');
+
+            // 创建一个新窗口打开游戏
+            const gameWindow = window.open('tower-final.html', '_blank');
+
+            if (gameWindow) {
+                addLog('✅ 游戏窗口已打开', 'success');
+                addLog('⚠️ 请在新打开的窗口中点击"开始游戏"按钮', 'info');
+
+                // 监听新窗口的消息
+                window.addEventListener('message', (event) => {
+                    addLog(`收到消息: ${event.data}`, 'info');
+                });
+
+                // 5秒后检查新窗口是否还在
+                setTimeout(() => {
+                    try {
+                        if (gameWindow.closed) {
+                            addLog('⚠️ 游戏窗口已关闭', 'info');
+                        } else {
+                            addLog('✅ 游戏窗口仍然打开', 'success');
+                        }
+                    } catch (e) {
+                        addLog('❌ 无法访问游戏窗口（可能是跨域限制）', 'error');
+                    }
+                }, 5000);
+            } else {
+                addLog('❌ 无法打开游戏窗口（可能被浏览器拦截）', 'error');
+                addLog('💡 请点击页面上的允许弹窗按钮，然后重试', 'info');
+            }
+        }
+
+        function testGameFunctions() {
+            addLog('🧪 开始测试游戏函数...', 'info');
+
+            // 加载游戏脚本
+            const script = document.createElement('script');
+            script.src = 'tower-final.html';
+
+            script.onerror = () => {
+                addLog('❌ 加载tower-final.html失败（HTML文件不能作为脚本加载）', 'error');
+                addLog('💡 这是一个正常的错误，HTML文件应该直接在浏览器中打开', 'info');
+            };
+
+            script.onload = () => {
+                addLog('✅ 脚本加载完成（实际上这是不可能的）', 'success');
+            };
+
+            document.head.appendChild(script);
+
+            setTimeout(() => {
+                addLog('💡 建议使用"直接打开游戏"功能', 'info');
+                addLog('💡 或者直接在浏览器中打开 tower-final.html 文件', 'info');
+            }, 1000);
+        }
+
+        // 自动运行基础检查
+        setTimeout(runBasicChecks, 500);
+    </script>
+</body>
+</html>
