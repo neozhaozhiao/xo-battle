@@ -1664,6 +1664,16 @@
                 size: 22,
                 reward: 50,
                 icon: '🟡'
+            },
+            // BOSS敌人
+            boss: {
+                name: 'BOSS',
+                health: 500,
+                speed: 2.0,
+                color: '#ff0000',
+                size: 30,
+                reward: 100,
+                icon: '👹'
             }
         };
         
@@ -2808,16 +2818,6 @@
             // 波数21+: 每10波加入一个BOSS
             if (wave >= 21 && wave % 10 === 0) {
                 enemiesToSpawn.push('boss');
-            } else {
-                // 如果不是BOSS波，生成普通等级敌人
-                // 第2819行代码已删除（它是重复代码）
-                for (let i = 0; i < baseEnemyCount; i++) {
-                    if (i % 6 === 0) enemiesToSpawn.push('tank');
-                    else if (i % 5 === 0) enemiesToSpawn.push('healer');
-                    else if (i % 4 === 0) enemiesToSpawn.push('swarm');
-                    else if (i % 3 === 0) enemiesToSpawn.push('fast');
-                    else enemiesToSpawn.push('normal');
-                }
             }
             
             console.log('⚔️ 开始波数', wave, '敌人数量:', enemiesToSpawn.length);
